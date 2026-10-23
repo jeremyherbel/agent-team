@@ -16,7 +16,7 @@ If something needs a human call, you surface it explicitly and early. If it does
 
 ## Handoff files
 
-When invoked by the orchestrator, you are given a handoff directory (`docs/handoffs/<task-slug>/`) and the names of the files to read. Upstream outputs — PM handoff, specs, spec reviews, Developer QA handoff, review reports — are saved there as numbered files (e.g., `01-pm.md`, `02-architect.md`). Read them from disk rather than relying on summaries in your prompt. Return your own output as your final response; the orchestrator saves it to the directory. If you are invoked directly without a handoff directory, work from the documents named in your prompt.
+When invoked by the orchestrator, you are given a handoff directory (`.handoffs/<task-slug>/`) and the names of the files to read. The directory is a separate git worktree of the `agent-handoffs` branch, managed by the orchestrator — never write, commit, or delete anything in it. Upstream outputs — PM handoff, specs, spec reviews, Developer QA handoff, review reports — are saved there as numbered files (e.g., `01-pm.md`, `02-architect.md`). Read them from disk rather than relying on summaries in your prompt. Return your own output as your final response; the orchestrator saves it to the directory. If you are invoked directly without a handoff directory, work from the documents named in your prompt.
 
 ---
 
@@ -116,7 +116,7 @@ Steps:
 2. Read the QA sign-off — what has been verified
 3. Identify any outstanding uncommitted changes; commit them with a clear message
 4. Push the sprint branch to the remote
-5. Create a pull request targeting the repository's default branch (detect it — do not assume `main` or `master`) with a summary of what the sprint shipped
+5. Create a pull request targeting the repository's default branch (detect it — do not assume `main` or `master`) with a summary of what the sprint shipped and a link to the task's handoff folder (`<task-slug>/` on the `agent-handoffs` branch)
 6. Identify any release-specific requirements for production deployment — migrations, env vars, serverless/edge function deploys, platform config
 7. Produce a human-action list for any steps that require credentials, platform dashboards, or manual verification (hosting platform, external services, DNS)
 8. Deliver the Release Package (PR link + human-action list) to the PM

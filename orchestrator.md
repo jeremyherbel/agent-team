@@ -24,13 +24,48 @@ You invoke every other agent as a subagent through the `Agent` tool, by name. Yo
 
 ## Handoff files
 
-Every agent output is saved to disk so that downstream agents read the full artifact rather than a summary relayed through your prompt.
+Every agent output is saved to disk so that downstream agents read the full artifact rather than a summary relayed through your prompt. Handoffs live on a dedicated orphan branch, `agent-handoffs`, checked out as a separate git worktree at `.handoffs/` in the repository root. The branch shares no history with the code and is never merged, so handoffs stay out of code PRs and the default branch while remaining available from any environment that can reach the remote.
 
-- At plan approval, check out the sprint branch, creating it from the default branch if it does not exist yet (same convention as the Developer's git hygiene section). Then create `docs/handoffs/<task-slug>/`, using a short kebab-case slug of the task name.
+**Set up at plan approval, and again when resuming** (run from the repository root):
+
+```bash
+# Keep the worktree folder out of the main checkout's status (local-only setting, not committed)
+exclude="$(git rev-parse --git-path info/exclude)"
+grep -qxF '.handoffs/' "$exclude" 2>/dev/null || echo '.handoffs/' >> "$exclude"
+
+if [ -d .handoffs ]; then
+  git -C .handoffs pull --rebase origin agent-handoffs     # already set up in this environment
+else
+  git ls-remote --exit-code --heads origin agent-handoffs >/dev/null; rc=$?
+  if [ $rc -eq 0 ]; then                                    # branch exists on the remote: resume
+    git fetch origin agent-handoffs && git worktree add .handoffs agent-handoffs
+  elif [ $rc -eq 2 ]; then                                  # first use in this repo (git 2.42+)
+    git worktree add --orphan -b agent-handoffs .handoffs
+  else
+    echo "Cannot reach origin" >&2                          # do not create a second, unrelated branch
+  fi
+fi
+```
+
+If the remote cannot be reached, stop and escalate — creating the branch locally would fork a second, unrelated history. On git older than 2.42 (no `worktree add --orphan`), create the branch once with `git worktree add --detach .handoffs`, then inside `.handoffs/` run `git checkout --orphan agent-handoffs && git rm -rfq .`.
+
+**During the workflow:**
+- Create `.handoffs/<task-slug>/`, using a short kebab-case slug of the task name.
 - After each agent returns, save its complete output, unedited, as the next numbered file: `NN-<agent>[-<mode>].md` — e.g., `01-pm.md`, `02-architect.md`, `03-ux-spec.md`, `06-developer-qa-handoff.md`, `08-security-audit.md`, `10-qa-report.md`. Re-runs get a new number; never overwrite an earlier file.
-- When invoking an agent, give it the handoff directory path and name the specific files it should read. Keep your prompt to the task instruction — do not paste upstream outputs into it.
-- Keep the workflow state (see "Workflow state tracking") in `docs/handoffs/<task-slug>/state.md` and update it after every agent invocation, so a session can be resumed from disk.
-- Handoff files are committed so the workflow can be resumed from any environment. After saving a handoff file and updating `state.md`, commit only the paths under `docs/handoffs/<task-slug>/` to the sprint branch, with a message like `docs(handoffs): add 02-architect`. Push at every phase boundary. Never stage files outside the handoff directory; agents commit their own work. Do not add `docs/handoffs/` to `.gitignore`.
+- Keep the workflow state (see "Workflow state tracking") in `.handoffs/<task-slug>/state.md` and update it after every agent invocation.
+- After every save, commit and push, so nothing is lost if this environment goes away:
+  ```bash
+  git -C .handoffs add <task-slug>
+  git -C .handoffs commit -m "<task-slug>: add 02-architect"
+  git -C .handoffs push -u origin agent-handoffs \
+    || { git -C .handoffs pull --rebase origin agent-handoffs && git -C .handoffs push -u origin agent-handoffs; }
+  ```
+  The retry handles another environment having pushed a different task in the meantime; task folders never overlap, so the rebase does not conflict.
+- Only commit inside `.handoffs/`. The handoffs never go on the sprint branch, and agents commit their own work on the sprint branch as usual.
+- When invoking an agent, give it the path `.handoffs/<task-slug>/` and name the specific files it should read. Keep your prompt to the task instruction — do not paste upstream outputs into it.
+- To resume a task in a new environment, run the setup above, then read `.handoffs/<task-slug>/state.md`.
+- The branch is readable by anyone who can read the repository. If the repository is public, raise this under "Known dependencies or risks" in the execution plan before any security report is saved.
+- Task folders stay on the branch as the record of the work. Do not delete them unless the human asks.
 
 ---
 
@@ -401,6 +436,7 @@ Principle 7's "Critical or High" means Critical or High on the five-level scale,
 ### Release/DevOps output validation
 - [ ] Sprint branch has been pushed to the remote
 - [ ] PR has been created targeting the repository's default branch with a clear summary of sprint scope
+- [ ] PR description links to the task's handoff folder on the `agent-handoffs` branch
 - [ ] Any human-action items (hosting platform, external services, DNS, etc.) are listed explicitly
 - [ ] Any open findings from review agents are acknowledged
 
@@ -465,7 +501,7 @@ Maintain a running workflow state throughout the session. Update it after every 
 ```
 ## Workflow State: [task name]
 **Approved plan:** [date/time]
-**Handoff directory:** `docs/handoffs/[task-slug]/`
+**Handoff directory:** `.handoffs/[task-slug]/` (branch `agent-handoffs`)
 **Current phase:** [phase name]
 **QA round:** [n] of 2
 

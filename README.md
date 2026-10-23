@@ -30,7 +30,7 @@ All agents are project-agnostic — they orient themselves by reading your proje
 
 The core loop (PM → Developer → Docs Writer → QA → Release/DevOps → PM) always runs, in order. Specialist agents (brackets above) are invoked adaptively — only when the task warrants them. Spec reviews wait for the spec they review (Security after Architect, Accessibility and Analytics after UX). The orchestrator manages the whole thing.
 
-Every agent's output is saved to `docs/handoffs/<task-slug>/` as a numbered file, along with the workflow state. Downstream agents read the full artifacts from disk. The orchestrator commits the handoff directory to the sprint branch and pushes at each phase boundary, so you can resume a task from another machine or environment.
+Every agent's output is saved as a numbered file in `.handoffs/<task-slug>/`, along with the workflow state, and downstream agents read the full artifacts from disk. `.handoffs/` is a separate git worktree of an orphan branch, `agent-handoffs`, which shares no history with your code and is never merged. The orchestrator commits and pushes after every handoff, so you can resume a task from another machine or environment, and handoffs never show up in code PRs or on your default branch. The branch is readable by anyone who can read the repo, so on a public repo the orchestrator flags that before saving security reports. Requires git 2.42+, or a one-time manual setup on older versions (see the orchestrator).
 
 Risk acceptance stays with you: the PM agent recommends, but QA conditions, shipping with Major QA findings, and Critical/High review findings are escalated to you to decide.
 

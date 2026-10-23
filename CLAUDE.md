@@ -31,11 +31,11 @@ All current agents use `model: sonnet`. Tool access:
 - `security-reviewer`, `accessibility-reviewer`, and `analytics` use `disallowedTools: Write, Edit, NotebookEdit, Agent`. They are advisory and must not edit files, but they keep inherited browser and MCP tools.
 - All other agents inherit every tool because they write project files (code, tests, docs, decision log, status docs).
 
-Every agent except the orchestrator has a "Handoff files" section explaining that upstream outputs are read from `docs/handoffs/<task-slug>/`. Keep it identical across agents.
+Every agent except the orchestrator has a "Handoff files" section explaining that upstream outputs are read from `.handoffs/<task-slug>/` and that agents never write there. Keep it identical across agents.
 
 ## Workflow architecture
 
-The `orchestrator` agent coordinates all others. It does not do domain work — it routes, validates handoffs, tracks state, and escalates to the human when blocked. It must run as the main session (`claude --agent orchestrator` or `"agent": "orchestrator"` in settings), because subagents have no `AskUserQuestion` tool and cannot get plan approval or escalate mid-run. It saves every agent's output to `docs/handoffs/<task-slug>/` as numbered files, and downstream agents read from there. It commits that directory to the sprint branch and pushes at phase boundaries, so work can resume from another environment.
+The `orchestrator` agent coordinates all others. It does not do domain work — it routes, validates handoffs, tracks state, and escalates to the human when blocked. It must run as the main session (`claude --agent orchestrator` or `"agent": "orchestrator"` in settings), because subagents have no `AskUserQuestion` tool and cannot get plan approval or escalate mid-run. It saves every agent's output as numbered files in `.handoffs/<task-slug>/`, and downstream agents read from there. `.handoffs/` is a git worktree of the orphan branch `agent-handoffs`, which is never merged. The orchestrator commits and pushes after every handoff, so work can resume from another environment without handoffs entering code PRs or the default branch.
 
 **Execution flow:**
 
