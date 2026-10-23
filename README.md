@@ -25,7 +25,7 @@ All agents are project-agnostic — they orient themselves by reading your proje
 ## Workflow
 
 ```
-[Product Owner] → PM → [Architect, UX] → [Analytics, Security spec review, Accessibility spec review] → Developer → Docs Writer + [Security audit, UX review, Accessibility audit, Code Quality] → QA → Release/DevOps → PM
+[Product Owner] → PM → [Architect, UX] → [Analytics, Security spec review, Accessibility spec review] → Developer → Docs Writer + [Security audit, UX review, Accessibility audit, Code Quality] → QA → Release/DevOps → PM (session close)
 ```
 
 The core loop (PM → Developer → Docs Writer → QA → Release/DevOps → PM) always runs, in order. Specialist agents (brackets above) are invoked adaptively — only when the task warrants them. Spec reviews wait for the spec they review (Security after Architect, Accessibility and Analytics after UX). The orchestrator manages the whole thing.
