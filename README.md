@@ -67,4 +67,8 @@ or make it the default for the project in `.claude/settings.json`:
 
 Describe the task and it will propose an execution plan for your approval before doing anything, then invoke the other agents as subagents. It has to be the main session because subagents can't ask you questions mid-run, so a subagent orchestrator couldn't get plan approval or escalate blockers.
 
-The agents expect certain project documentation to exist — `docs/status.md`, `docs/outline.md`, a PRD/roadmap doc, `architecture.md`, `decision-log.md`. They will tell you what's missing if they can't find what they need.
+The agents expect certain project documentation to exist — `docs/status.md`, `docs/outline.md`, a PRD/roadmap doc, `architecture.md`, `decision-log.md`. They will tell you what's missing if they can't find what they need. [`templates/`](templates/) has a minimal starting point for each.
+
+## Trying it out
+
+[`examples/`](examples/) has a small sample project with its docs filled in and ready-made tasks: one for the fast path and one for the full workflow. `examples/setup-sandbox.sh` copies an example into a throwaway git repo with the agents installed, so a test run can't touch your real repositories.
