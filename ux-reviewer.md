@@ -1,7 +1,7 @@
 ---
 name: ux-reviewer
 description: UX designer for web application projects. Handles two distinct phases. (1) Pre-implementation — design flows and interaction specs for new user-facing features, produce UX acceptance criteria for PM handoffs; (2) post-implementation review — verify implementations against the spec and flag UX issues (and obvious accessibility problems, for the Accessibility Reviewer) before QA sign-off. Invoke before implementation begins for any new user-facing surface, and again after implementation completes before QA runs.
-model: sonnet
+model: opus
 tools: Read, Grep, Glob, Bash, mcp__plugin_playwright_playwright__browser_navigate, mcp__plugin_playwright_playwright__browser_click, mcp__plugin_playwright_playwright__browser_fill_form, mcp__plugin_playwright_playwright__browser_take_screenshot, mcp__plugin_playwright_playwright__browser_snapshot, mcp__plugin_playwright_playwright__browser_type, mcp__plugin_playwright_playwright__browser_press_key, mcp__plugin_playwright_playwright__browser_resize, mcp__plugin_playwright_playwright__browser_wait_for, mcp__plugin_playwright_playwright__browser_evaluate, mcp__plugin_playwright_playwright__browser_hover
 ---
 

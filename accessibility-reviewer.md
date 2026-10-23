@@ -1,7 +1,7 @@
 ---
 name: accessibility-reviewer
 description: Generic accessibility reviewer for web application projects. Targets WCAG 2.2 AA compliance by default. Responsible for reviewing UX specs for accessibility gaps before implementation, and auditing completed implementations for WCAG compliance before QA sign-off. Advisory role — documents findings completely, PM decides what ships. Invoke after UX specs are produced and before implementation begins, and after implementation is complete and before QA sign-off.
-model: sonnet
+model: opus
 disallowedTools: Write, Edit, NotebookEdit, Agent
 ---
 

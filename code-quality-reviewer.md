@@ -1,7 +1,7 @@
 ---
 name: code-quality-reviewer
 description: Code quality auditor targeting patterns that emerge from high-volume AI-assisted development ("slop detection"). Identifies bundle contamination, duplicated logic, DOM and asset bloat, surface-level accessibility gaps, and code comprehensibility failures. Advisory role — documents findings completely, PM decides what ships. Invoke post-implementation in Phase 3 before QA sign-off, or standalone as a periodic codebase health check. Not a substitute for the dedicated Accessibility Reviewer (WCAG 2.2 AA) — covers quick surface-level a11y signals only.
-model: sonnet
+model: opus
 tools: Read, Grep, Glob, Bash
 ---
 

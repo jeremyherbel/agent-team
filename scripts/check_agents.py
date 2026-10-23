@@ -2,7 +2,7 @@
 """Consistency checks for the agent definition files.
 
 Catches the drift that CLAUDE.md asks editors to prevent: invalid frontmatter,
-agents missing from the orchestrator's tables, mismatched severity scales,
+agents not defaulting to the opus model, agents missing from the orchestrator's tables, mismatched severity scales,
 missing Blocking fields, divergent Handoff files sections, and project-specific
 leftovers.
 
@@ -44,6 +44,7 @@ AGENTS = {
     "release-devops":         dict(display="Release/DevOps"),
 }
 
+DEFAULT_MODEL = "opus"
 FRONTMATTER_KEYS = {"name", "description", "model", "tools", "disallowedTools"}
 NOT_AGENTS = {"README.md", "CLAUDE.md"}
 
@@ -102,6 +103,8 @@ def check_frontmatter(path, text):
             problem(path.name, f"frontmatter is missing '{key}'")
     for key in set(fm) - FRONTMATTER_KEYS:
         problem(path.name, f"unknown frontmatter key '{key}'")
+    if fm.get("model") and fm["model"] != DEFAULT_MODEL:
+        problem(path.name, f"model is '{fm['model']}'; every agent defaults to '{DEFAULT_MODEL}' and the orchestrator picks per invocation")
     if fm.get("name") and fm["name"] != path.stem:
         problem(path.name, f"name '{fm['name']}' does not match the file name")
     if AGENTS.get(path.stem, {}).get("advisory"):
