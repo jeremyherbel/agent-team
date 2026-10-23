@@ -36,7 +36,7 @@ Small tasks take a **fast path**: Developer → Docs Writer (only if user-visibl
 
 Every agent defaults to Opus. The orchestrator chooses the model for each invocation — Sonnet or Haiku for well-specified or mechanical work, Opus for judgment calls (always for the Architect and Security Reviewer) — and lists its choices in the plan for you to approve or change.
 
-Risk acceptance stays with you: the PM agent recommends, but QA conditions, shipping with Major QA findings, and Critical/High review findings are escalated to you to decide.
+After you approve the plan, the team works without you. It stops only for decisions that are genuinely yours: accepting risk on a serious problem the change introduced or made worse, a critical existing problem, a scope change, a conflict between agents, or going more than 50% over the plan's agent-run budget. Existing problems the reviewers notice go to the backlog instead of into the task.
 
 ## Usage
 
@@ -67,4 +67,8 @@ or make it the default for the project in `.claude/settings.json`:
 
 Describe the task and it will propose an execution plan for your approval before doing anything, then invoke the other agents as subagents. It has to be the main session because subagents can't ask you questions mid-run, so a subagent orchestrator couldn't get plan approval or escalate blockers.
 
-The agents expect certain project documentation to exist — `docs/status.md`, `docs/outline.md`, a PRD/roadmap doc, `architecture.md`, `decision-log.md`. They will tell you what's missing if they can't find what they need.
+The agents expect certain project documentation to exist — `docs/status.md`, `docs/outline.md`, a PRD/roadmap doc, `architecture.md`, `decision-log.md`. They will tell you what's missing if they can't find what they need. [`templates/`](templates/) has a minimal starting point for each.
+
+## Trying it out
+
+[`examples/`](examples/) has a small sample project with its docs filled in and ready-made tasks: one for the fast path and one for the full workflow. `examples/setup-sandbox.sh` copies an example into a throwaway git repo with the agents installed, so a test run can't touch your real repositories.

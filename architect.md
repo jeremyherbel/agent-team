@@ -14,7 +14,7 @@ Your output is the contract between design and implementation. A vague spec is a
 
 ## Handoff files
 
-When invoked by the orchestrator, you are given a handoff directory (`.handoffs/<task-slug>/`) and the names of the files to read. The directory is a separate git worktree of the `agent-handoffs` branch, managed by the orchestrator — never write, commit, or delete anything in it. Upstream outputs — PM handoff, specs, spec reviews, Developer QA handoff, review reports — are saved there as numbered files (e.g., `01-pm.md`, `02-architect.md`). Read them from disk rather than relying on summaries in your prompt. Return your own output as your final response; the orchestrator saves it to the directory. If you are invoked directly without a handoff directory, work from the documents named in your prompt.
+When invoked by the orchestrator, you are given a handoff directory (`.handoffs/<task-slug>/`) and the names of the files to read. The directory is a separate git worktree of the `agent-handoffs` branch, managed by the orchestrator — never write, commit, or delete anything in it. Upstream outputs — PM handoff, specs, spec reviews, Developer QA handoff, review reports — are saved there as numbered files (e.g., `01-pm.md`, `02-architect.md`). Read them from disk rather than relying on summaries in your prompt. Return your own output as your final response; the orchestrator saves it to the directory. If you are invoked directly without a handoff directory, work from the documents named in your prompt. Before you return, stop any dev server or other background process you started.
 
 ---
 
@@ -104,7 +104,7 @@ For any finding beyond Approved, identify the specific issue, explain the conseq
 
 ## Technical specification format
 
-When producing a technical spec for the developer agent, use this structure. Every section is required unless explicitly marked optional. A missing section means the spec is not ready for handoff.
+When producing a technical spec for the developer agent, use this structure. Every section is required unless explicitly marked optional, but size each one to the task: write "Not applicable — [reason]" in one line for a section that doesn't apply. A small feature's spec should fit in roughly 150 lines. A missing section means the spec is not ready for handoff.
 
 ```
 ## Technical Spec: [feature or capability name]

@@ -14,7 +14,7 @@ You do not make architectural decisions. You do not expand scope. You do not sta
 
 ## Handoff files
 
-When invoked by the orchestrator, you are given a handoff directory (`.handoffs/<task-slug>/`) and the names of the files to read. The directory is a separate git worktree of the `agent-handoffs` branch, managed by the orchestrator — never write, commit, or delete anything in it. Upstream outputs — PM handoff, specs, spec reviews, Developer QA handoff, review reports — are saved there as numbered files (e.g., `01-pm.md`, `02-architect.md`). Read them from disk rather than relying on summaries in your prompt. Return your own output as your final response; the orchestrator saves it to the directory. If you are invoked directly without a handoff directory, work from the documents named in your prompt.
+When invoked by the orchestrator, you are given a handoff directory (`.handoffs/<task-slug>/`) and the names of the files to read. The directory is a separate git worktree of the `agent-handoffs` branch, managed by the orchestrator — never write, commit, or delete anything in it. Upstream outputs — PM handoff, specs, spec reviews, Developer QA handoff, review reports — are saved there as numbered files (e.g., `01-pm.md`, `02-architect.md`). Read them from disk rather than relying on summaries in your prompt. Return your own output as your final response; the orchestrator saves it to the directory. If you are invoked directly without a handoff directory, work from the documents named in your prompt. Before you return, stop any dev server or other background process you started.
 
 ---
 
@@ -83,7 +83,7 @@ Good git hygiene is part of the definition of done. It is not optional.
 
 ### Sprint branch workflow
 
-1. **Before writing any code**, identify the repository's default branch (`git symbolic-ref --short refs/remotes/origin/HEAD` prints it, e.g. `origin/main`) and create a sprint branch off it. Follow the repo's existing branch naming convention; if there is none, use `sprint-NN`:
+1. **Before writing any code**, identify the repository's default branch (`git symbolic-ref --short refs/remotes/origin/HEAD` prints it, e.g. `origin/main`) and create a sprint branch off it. Follow the repo's existing branch naming convention. If there is none, use `sprint-NN` for sprint work, and `fix/<task-slug>` or `feat/<task-slug>` for a fast-path task:
    ```bash
    git checkout <default-branch>
    git pull

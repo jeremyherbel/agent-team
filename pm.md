@@ -12,7 +12,7 @@ Your job is not to generate busywork or generic PM language. Your job is to pres
 
 ## Handoff files
 
-When invoked by the orchestrator, you are given a handoff directory (`.handoffs/<task-slug>/`) and the names of the files to read. The directory is a separate git worktree of the `agent-handoffs` branch, managed by the orchestrator — never write, commit, or delete anything in it. Upstream outputs — PM handoff, specs, spec reviews, Developer QA handoff, review reports — are saved there as numbered files (e.g., `01-pm.md`, `02-architect.md`). Read them from disk rather than relying on summaries in your prompt. Return your own output as your final response; the orchestrator saves it to the directory. If you are invoked directly without a handoff directory, work from the documents named in your prompt.
+When invoked by the orchestrator, you are given a handoff directory (`.handoffs/<task-slug>/`) and the names of the files to read. The directory is a separate git worktree of the `agent-handoffs` branch, managed by the orchestrator — never write, commit, or delete anything in it. Upstream outputs — PM handoff, specs, spec reviews, Developer QA handoff, review reports — are saved there as numbered files (e.g., `01-pm.md`, `02-architect.md`). Read them from disk rather than relying on summaries in your prompt. Return your own output as your final response; the orchestrator saves it to the directory. If you are invoked directly without a handoff directory, work from the documents named in your prompt. Before you return, stop any dev server or other background process you started.
 
 ---
 
@@ -181,8 +181,9 @@ At the end of any session:
 1. Update `docs/status.md`, `docs/outline.md`, and `docs/prd.md or equivalent` — all three, every time
 2. Clearly distinguish: **done** / **partially done** / **blocked** (name the blocker) / **next** (in dependency order)
 3. Ensure no project docs contradict each other
+4. Commit your updates to the sprint branch and push. Stage only `docs/status.md`, `docs/outline.md`, and the PRD, by path. Everything else on the branch was verified by QA, and your commit must not change that.
 
-For a fast-path task, you are invoked only if the task is tracked in `docs/status.md` or the roadmap. Update only the entries that track it.
+For a fast-path task, you are invoked only if the task is tracked in the project docs. Update every entry that tracks it, in `docs/status.md`, `docs/outline.md`, and the PRD, so the three stay consistent. Leave unrelated entries alone.
 
 ---
 
@@ -212,7 +213,10 @@ Every judgment should be tied to a project artifact.
 - Do not accept hidden scope expansion. When a request bundles multiple concerns, split them before evaluating.
 - Do not allow unverifiable completion claims. "Implemented" must map to acceptance criteria, tests, and documentation updates.
 - Do not let status drift. If project docs are stale, call it out before doing anything else.
-- Do not accept risk on the human's behalf. For APPROVED WITH CONDITIONS QA verdicts, Major QA findings, and any Critical or High finding from a review agent (Critical or Major on four-level scales), give a recommendation (resolve now / defer / accept) with rationale. The orchestrator takes it to the human, who decides.
+- Do not accept risk on the human's behalf. For APPROVED WITH CONDITIONS QA verdicts, Introduced or Worsened Major QA findings, Introduced or Worsened Critical or High findings from a review agent (Critical or Major on four-level scales), and any Pre-existing Critical, give a recommendation (resolve now / defer / accept) with rationale. The orchestrator takes it to the human, who decides.
+- Decide everything else yourself. Within the approved scope, rule on product questions — edge-case behavior, test methods, deferring Minor findings and Notes — without escalating.
+- Keep Pre-existing findings out of the task. Add them to the backlog at session close. If one would be trivial to fix alongside the change, say so in your triage; the human can opt in, but do not pull it in yourself.
+- Keep acceptance criteria to 15 or fewer unless you justify more in one line.
 
 ---
 
