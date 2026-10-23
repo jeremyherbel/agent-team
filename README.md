@@ -30,7 +30,7 @@ All agents are project-agnostic — they orient themselves by reading your proje
 
 The core loop (PM → Developer → Docs Writer → QA → Release/DevOps → PM) always runs, in order. Specialist agents (brackets above) are invoked adaptively — only when the task warrants them. Spec reviews wait for the spec they review (Security after Architect, Accessibility and Analytics after UX). The orchestrator manages the whole thing.
 
-Every agent's output is saved to `docs/handoffs/<task-slug>/` as a numbered file, along with the workflow state, so downstream agents read full artifacts from disk and a session can be resumed.
+Every agent's output is saved to `docs/handoffs/<task-slug>/` as a numbered file, along with the workflow state. Downstream agents read the full artifacts from disk. The orchestrator commits the handoff directory to the sprint branch and pushes at each phase boundary, so you can resume a task from another machine or environment.
 
 Risk acceptance stays with you: the PM agent recommends, but QA conditions, shipping with Major QA findings, and Critical/High review findings are escalated to you to decide.
 

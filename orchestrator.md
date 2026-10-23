@@ -26,11 +26,11 @@ You invoke every other agent as a subagent through the `Agent` tool, by name. Yo
 
 Every agent output is saved to disk so that downstream agents read the full artifact rather than a summary relayed through your prompt.
 
-- At plan approval, create `docs/handoffs/<task-slug>/` (short kebab-case slug of the task name).
+- At plan approval, check out the sprint branch, creating it from the default branch if it does not exist yet (same convention as the Developer's git hygiene section). Then create `docs/handoffs/<task-slug>/`, using a short kebab-case slug of the task name.
 - After each agent returns, save its complete output, unedited, as the next numbered file: `NN-<agent>[-<mode>].md` — e.g., `01-pm.md`, `02-architect.md`, `03-ux-spec.md`, `06-developer-qa-handoff.md`, `08-security-audit.md`, `10-qa-report.md`. Re-runs get a new number; never overwrite an earlier file.
 - When invoking an agent, give it the handoff directory path and name the specific files it should read. Keep your prompt to the task instruction — do not paste upstream outputs into it.
 - Keep the workflow state (see "Workflow state tracking") in `docs/handoffs/<task-slug>/state.md` and update it after every agent invocation, so a session can be resumed from disk.
-- If the project has no convention for whether `docs/handoffs/` is committed or ignored, raise it under "Known dependencies or risks" in the execution plan.
+- Handoff files are committed so the workflow can be resumed from any environment. After saving a handoff file and updating `state.md`, commit only the paths under `docs/handoffs/<task-slug>/` to the sprint branch, with a message like `docs(handoffs): add 02-architect`. Push at every phase boundary. Never stage files outside the handoff directory; agents commit their own work. Do not add `docs/handoffs/` to `.gitignore`.
 
 ---
 

@@ -35,7 +35,7 @@ Every agent except the orchestrator has a "Handoff files" section explaining tha
 
 ## Workflow architecture
 
-The `orchestrator` agent coordinates all others. It does not do domain work — it routes, validates handoffs, tracks state, and escalates to the human when blocked. It must run as the main session (`claude --agent orchestrator` or `"agent": "orchestrator"` in settings), because subagents have no `AskUserQuestion` tool and cannot get plan approval or escalate mid-run. It saves every agent's output to `docs/handoffs/<task-slug>/` as numbered files, and downstream agents read from there.
+The `orchestrator` agent coordinates all others. It does not do domain work — it routes, validates handoffs, tracks state, and escalates to the human when blocked. It must run as the main session (`claude --agent orchestrator` or `"agent": "orchestrator"` in settings), because subagents have no `AskUserQuestion` tool and cannot get plan approval or escalate mid-run. It saves every agent's output to `docs/handoffs/<task-slug>/` as numbered files, and downstream agents read from there. It commits that directory to the sprint branch and pushes at phase boundaries, so work can resume from another environment.
 
 **Execution flow:**
 
@@ -78,5 +78,7 @@ Every review finding format carries a `Blocking: Yes / No` field. Security and C
 
 - The `description` field is the invocation routing signal — keep it precise about scope and timing
 - Output format sections (handoff formats, report formats) are consumed by the orchestrator's validation rules; changing them requires updating the orchestrator's validation checklist
-- When a task or project reference is embedded in an agent (e.g., pm, product-owner, ux-reviewer), update it when the project changes rather than making the agent fully generic
+- Keep every agent fully generic. Never embed project names, file paths, absolute paths, stack assumptions (framework, styling library, build tool, branch names), or product-specific goals. When an agent needs project facts, have it discover them: read the project's docs, inspect the manifest, or detect the default branch. Phrase stack-specific checks as examples ("e.g., Tailwind") and make them conditional on the stack.
+- When you deploy these agents to a project, do not edit the copies to add project details. Put those details in the project's own docs (`CLAUDE.md`, `architecture.md`, `docs/guidelines.md`, and so on), which the agents already read.
+- Before committing, grep for leftovers: absolute paths (`/sessions/`, `/Users/`, `/home/`), hardcoded branch names (`` `master` ``, `` `main` ``), and product-specific nouns.
 - The orchestrator's workflow state table and validation checklists must stay consistent with whatever output formats the individual agents declare
