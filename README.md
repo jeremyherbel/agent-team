@@ -15,7 +15,7 @@ All agents are project-agnostic — they orient themselves by reading your proje
 | `ux-reviewer` | Interaction design (pre-implementation) and UX review (post-implementation) |
 | `analytics` | Success metrics, event schemas, instrumentation plans |
 | `security-reviewer` | Spec review for security surface, implementation audit |
-| `accessibility-reviewer` | WCAG 2.1 AA compliance — spec review and implementation audit |
+| `accessibility-reviewer` | WCAG 2.2 AA compliance — spec review and implementation audit |
 | `developer` | TDD implementation against specs, documentation, QA handoffs |
 | `docs-writer` | User-facing docs, API docs, changelog |
 | `code-quality-reviewer` | Bundle contamination, redundant logic, asset bloat, AI slop detection |

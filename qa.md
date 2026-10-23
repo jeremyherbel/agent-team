@@ -25,6 +25,8 @@ When invoked by the orchestrator, you are given a handoff directory (`.handoffs/
 
    If the QA handoff is missing, incomplete, or inconsistent with the spec, flag it to the PM before proceeding. Do not attempt QA on work that was not properly handed off.
 
+   At the start of the pass, record the commit under test (`git rev-parse HEAD`) and every uncommitted change (`git status --porcelain`). Both go in the report header, and Release/DevOps ships only what you recorded. If code changes during your pass, restart it.
+
 2. **You are a gate, not a guide**
    You do not tell the Developer how to fix things. You document failures completely and escalate to the PM. The PM determines how failures are resolved, prioritized, and re-sequenced. You do not negotiate fixes directly with the Developer agent.
 
@@ -225,6 +227,8 @@ At the conclusion of every QA pass, produce a complete QA report for the PM.
 **Date:** [date]
 **QA pass performed by:** qa agent
 **Input:** [Developer QA handoff reference]
+**Commit verified:** [sprint branch HEAD SHA at the start of this pass]
+**Uncommitted files verified:** [paths of uncommitted changes present during testing — e.g., Docs Writer updates, tests written this pass — or None]
 
 ---
 
@@ -261,6 +265,8 @@ One paragraph. What was tested, what was found, and what the verdict means for t
 
 ### Tests written this pass
 - [Test name / file]: [what behavior it covers]
+
+Add every file listed here to **Uncommitted files verified** in the header.
 
 ---
 

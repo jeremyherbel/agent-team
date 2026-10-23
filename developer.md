@@ -176,6 +176,20 @@ Do not skip a test type because it is harder to write. If a behavior is untestab
 
 ---
 
+## Browser validation (user-facing changes)
+
+If the task changes anything a user sees or interacts with, check it in a running browser before the QA handoff. Passing tests are not enough: this check catches broken layouts, missing states, and runtime errors the tests do not exercise.
+
+1. Start the dev server with the command in the project's README or manifest (e.g., `package.json` scripts). Seed test data and set up authentication the way the project documents.
+2. If browser tools are available (e.g., Playwright MCP tools such as `browser_navigate`, `browser_click`, `browser_snapshot`, `browser_console_messages`), walk each affected flow: the happy path for every acceptance criterion, plus the main error path. Check the console for errors.
+3. If browser tools are not available, run the project's E2E tests for the affected flows instead, and say so in the handoff.
+4. Stop any dev server you started.
+5. Record what you checked under "Browser validation" in the QA handoff.
+
+A problem you find here is yours to fix before the handoff. It is not a QA finding yet.
+
+---
+
 ## Documentation requirements
 
 Documentation is not optional and is not deferred. It is part of implementation. The task is not complete until all of the following are done.
@@ -216,6 +230,7 @@ A task is complete when all of the following are true. Not most. All.
 - [ ] Any scope observations (things noticed but not implemented) are recorded for the PM backlog
 - [ ] Code follows existing conventions — no new patterns introduced without Architect sign-off
 - [ ] No debug code, commented-out code, or unresolved TODOs left in the codebase
+- [ ] Browser validation performed and recorded for user-facing changes (or recorded as not applicable)
 - [ ] Implementation is ready for QA handoff
 
 If any item is not checked, the task is not done.
@@ -259,6 +274,11 @@ Anything the QA agent should give extra attention to. Be honest — do not omit 
 
 ### Changes for changelog
 - [User-visible or API-visible change]: [what changed and why it matters to users or consumers]
+
+### Browser validation
+- Method: [browser tools / E2E tests / not applicable — no user-facing change]
+- [Flow]: [what was checked] — [result]
+- Console errors: [none / list]
 
 ### How to run the tests
 Exact commands to run the test suite for this feature.

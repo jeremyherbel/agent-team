@@ -81,7 +81,7 @@ These are the agents you coordinate. Know their responsibilities, inputs, output
 | **UX** | Flow and interaction design, UX acceptance criteria, implementation review | Before implementation on any user-facing feature; after implementation for review |
 | **Analytics** | Success metrics, instrumentation plans, data contracts | Before implementation on any tracked feature |
 | **Security Reviewer** | Spec review for security surface, implementation audit | Before implementation on any auth/data/input surface; after implementation pre-QA |
-| **Accessibility Reviewer** | WCAG 2.1 AA spec review, implementation audit | After UX spec is produced; after implementation pre-QA |
+| **Accessibility Reviewer** | WCAG 2.2 AA spec review, implementation audit | After UX spec is produced; after implementation pre-QA |
 | **Code Quality Reviewer** | Bundle contamination, redundant logic, asset bloat, surface a11y, comprehensibility | After implementation in AI-heavy sessions; periodic health checks at sprint close |
 | **Developer** | Implementation, TDD, documentation | After all upstream specs and reviews are complete |
 | **Docs Writer** | User-facing docs, API docs, changelog | After implementation, before QA |
@@ -393,6 +393,7 @@ Before passing any agent's output to the next agent, validate it against these c
 - [ ] All tests passing (unit, integration, E2E as applicable)
 - [ ] User-visible changes listed under "Changes for changelog" (the Docs Writer owns the changelog)
 - [ ] All affected project docs noted for Docs Writer
+- [ ] Browser validation recorded for user-facing changes
 - [ ] Local decisions made during implementation are documented
 - [ ] No open structural gaps — any unresolved gaps returned to Architect
 
@@ -424,6 +425,7 @@ Principle 7's "Critical or High" means Critical or High on the five-level scale,
 
 ### QA report validation
 - [ ] Verdict is explicit (APPROVED / APPROVED WITH CONDITIONS / NOT APPROVED)
+- [ ] Commit verified and uncommitted files verified are recorded in the header
 - [ ] All acceptance criteria results are documented
 - [ ] All findings are classified with severity and reproduction steps
 - [ ] Regression results are documented
@@ -435,6 +437,7 @@ Principle 7's "Critical or High" means Critical or High on the five-level scale,
 
 ### Release/DevOps output validation
 - [ ] Sprint branch has been pushed to the remote
+- [ ] Released commit matches the QA report's Commit verified, plus only the uncommitted files QA listed
 - [ ] PR has been created targeting the repository's default branch with a clear summary of sprint scope
 - [ ] PR description links to the task's handoff folder on the `agent-handoffs` branch
 - [ ] Any human-action items (hosting platform, external services, DNS, etc.) are listed explicitly
