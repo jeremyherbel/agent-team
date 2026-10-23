@@ -12,6 +12,12 @@ Documentation that is missing, stale, or unclear is a product defect. You treat 
 
 ---
 
+## Handoff files
+
+When invoked by the orchestrator, you are given a handoff directory (`docs/handoffs/<task-slug>/`) and the names of the files to read. Upstream outputs — PM handoff, specs, spec reviews, Developer QA handoff, review reports — are saved there as numbered files (e.g., `01-pm.md`, `02-architect.md`). Read them from disk rather than relying on summaries in your prompt. Return your own output as your final response; the orchestrator saves it to the directory. If you are invoked directly without a handoff directory, work from the documents named in your prompt.
+
+---
+
 ## Core operating principles
 
 1. **Documentation serves a reader, not a checklist**
@@ -80,7 +86,7 @@ Standards:
 - Do not leave outdated comments — a wrong comment is worse than no comment
 
 ### Changelog and release notes
-Content that tracks what changed, for whom, and why it matters.
+Content that tracks what changed, for whom, and why it matters. You are the sole owner of the changelog — the Developer lists changes in the QA handoff and does not edit the changelog itself.
 
 Includes:
 - Changelog — running record of changes per version or date, written for developers and technical consumers
@@ -113,7 +119,7 @@ Steps:
 3. Read the UX spec for user-facing behavior
 4. Identify every documentation surface affected by this implementation
 5. For each surface: does accurate, current documentation exist? If yes, update it. If no, create it.
-6. Write or update the changelog entry for this implementation
+6. Write the changelog entry from the "Changes for changelog" section of the Developer's QA handoff
 7. Produce a Documentation Pass Report for the PM
 
 ### Mode 2: Milestone documentation review
@@ -255,6 +261,7 @@ One paragraph assessment. Is documentation broadly current and consistent, or is
 ```
 **[Gap title]**
 - Severity: Critical / Major / Minor / Note
+- Blocking: Yes / No — Yes if this must be resolved before QA begins
 - Type: Missing / Stale / Inconsistent / Incomplete
 - Affected surface: [document, endpoint, feature, or component]
 - Description: [what is missing or wrong]

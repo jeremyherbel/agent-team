@@ -12,7 +12,7 @@ All agents are project-agnostic — they orient themselves by reading your proje
 | `pm` | Scope validation, acceptance criteria, task handoffs, session-close documentation |
 | `product-owner` | User-value prioritization, backlog grooming, sprint candidate ranking |
 | `architect` | System design, technical decision gates, implementation specs |
-| `ux-reviewer` | Interaction design (pre-implementation) and UX/accessibility review (post-implementation) |
+| `ux-reviewer` | Interaction design (pre-implementation) and UX review (post-implementation) |
 | `analytics` | Success metrics, event schemas, instrumentation plans |
 | `security-reviewer` | Spec review for security surface, implementation audit |
 | `accessibility-reviewer` | WCAG 2.1 AA compliance — spec review and implementation audit |
@@ -25,10 +25,14 @@ All agents are project-agnostic — they orient themselves by reading your proje
 ## Workflow
 
 ```
-[Product Owner] → PM → [Architect, UX, Analytics, Security] → Developer → [Docs, Security, UX, Accessibility, Code Quality] → QA → Release/DevOps → PM
+[Product Owner] → PM → [Architect, UX] → [Analytics, Security spec review, Accessibility spec review] → Developer → Docs Writer + [Security audit, UX review, Accessibility audit, Code Quality] → QA → Release/DevOps → PM
 ```
 
-The core loop is strictly sequenced. Specialist agents (brackets above) are invoked adaptively — only when the task warrants them. The orchestrator manages the whole thing.
+The core loop (PM → Developer → Docs Writer → QA → Release/DevOps → PM) always runs, in order. Specialist agents (brackets above) are invoked adaptively — only when the task warrants them. Spec reviews wait for the spec they review (Security after Architect, Accessibility and Analytics after UX). The orchestrator manages the whole thing.
+
+Every agent's output is saved to `docs/handoffs/<task-slug>/` as a numbered file, along with the workflow state, so downstream agents read full artifacts from disk and a session can be resumed.
+
+Risk acceptance stays with you: the PM agent recommends, but QA conditions, shipping with Major QA findings, and Critical/High review findings are escalated to you to decide.
 
 ## Usage
 
@@ -43,6 +47,20 @@ your-project/
         └── ...
 ```
 
-Then invoke the orchestrator at the start of any non-trivial task. It will propose an execution plan for your approval before doing anything.
+Then run the orchestrator as your **main session** — not as a subagent:
+
+```bash
+claude --agent orchestrator
+```
+
+or make it the default for the project in `.claude/settings.json`:
+
+```json
+{
+  "agent": "orchestrator"
+}
+```
+
+Describe the task and it will propose an execution plan for your approval before doing anything, then invoke the other agents as subagents. It has to be the main session because subagents can't ask you questions mid-run, so a subagent orchestrator couldn't get plan approval or escalate blockers.
 
 The agents expect certain project documentation to exist — `docs/status.md`, `docs/outline.md`, a PRD/roadmap doc, `architecture.md`, `decision-log.md`. They will tell you what's missing if they can't find what they need.

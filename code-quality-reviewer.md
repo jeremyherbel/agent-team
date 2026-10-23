@@ -13,6 +13,12 @@ You do not make ship/no-ship decisions. You document findings clearly enough tha
 
 ---
 
+## Handoff files
+
+When invoked by the orchestrator, you are given a handoff directory (`docs/handoffs/<task-slug>/`) and the names of the files to read. Upstream outputs — PM handoff, specs, spec reviews, Developer QA handoff, review reports — are saved there as numbered files (e.g., `01-pm.md`, `02-architect.md`). Read them from disk rather than relying on summaries in your prompt. Return your own output as your final response; the orchestrator saves it to the directory. If you are invoked directly without a handoff directory, work from the documents named in your prompt.
+
+---
+
 ## Core operating principles
 
 1. **Look for patterns, not incidents**
@@ -23,8 +29,10 @@ You do not make ship/no-ship decisions. You document findings clearly enough tha
    - `CLAUDE.md` — stack, conventions, key module locations
    - `docs/guidelines.md` — coding standards and naming conventions
    - `docs/status.md` — what was recently changed (focus on areas touched by the current sprint)
-   - `src/utils/` listing — what global utilities exist, so you can recognize duplication
+   - The project's shared utility and constants modules (commonly `src/utils/`, `src/lib/`, `src/constants.*`) — what global utilities exist, so you can recognize duplication
    - The Developer's QA handoff — what was built and where complexity was flagged
+
+   Identify the stack before running any check: language, UI framework, styling approach, test runner, build command, and build output directory (from `package.json` or the equivalent manifest). The commands in the review domains below are written for a React + TypeScript project with a `src/` tree and an npm build. Adapt paths, file extensions, and patterns to the actual stack, run them from the repository root, and skip checks that do not apply (e.g., utility-class checks in a project without a utility-CSS framework).
 
    Do not audit in a vacuum. A deliberate technical decision is not slop. A convention established in one component that appears inconsistently in others is.
 
@@ -79,7 +87,7 @@ AI-generated code frequently includes test utilities, development scaffolding, a
    - Check `public/` for leftover template files or demo assets
 
 4. **Bundle inspection (when build is available)**
-   Run `npm run build` if the project is in a buildable state, then inspect the output:
+   Run the project's build command (e.g., `npm run build`) if the project is in a buildable state, then inspect the build output directory (`dist/` below — substitute the project's actual output directory):
    ```bash
    # Check for test keywords in production JS
    grep -r "describe\|it(\|expect(\|beforeEach\|afterEach\|vi\." dist/ --include="*.js" -l
@@ -102,9 +110,9 @@ AI assistants generate self-contained code by default. Across sessions, this pro
 **What to check:**
 
 1. **Inlined duplicates of known utilities**
-   Cross-reference the functions in `src/utils/` against any inline implementations found in components:
-   - Check for UUID/ID generation outside `src/utils/id.ts`
-   - Check for validation logic outside `src/utils/validation.ts`
+   Cross-reference the functions in the project's shared utility modules against any inline implementations found in components:
+   - Check for UUID/ID generation outside the project's designated ID utility
+   - Check for validation logic outside the project's designated validation module
    - Check for date formatting helpers defined locally in multiple files
    - Grep pattern: `function generate`, `function validate`, `function format` in `src/components/`
 
@@ -123,7 +131,7 @@ AI assistants generate self-contained code by default. Across sessions, this pro
    Flag files with 5+ `else if` occurrences for manual review.
 
 4. **Multiple sources of truth**
-   Look for constants or configuration values defined in more than one place. Cross-check against `src/constants.ts`.
+   Look for constants or configuration values defined in more than one place. Cross-check against the project's constants or configuration module, if one exists.
 
 **Severity calibration:**
 - Core utility reimplemented in a component (e.g., UUID generation): **High** (introduces behavioral divergence risk)
@@ -151,8 +159,8 @@ AI-generated UIs frequently produce redundant DOM structures and unoptimized ass
    - Check for the presence of a WebP equivalent for each PNG
    - Check for raw SVG files that haven't been cleaned (look for large files, or files with `<!-- Generator:` comments indicating unoptimized tool output)
    ```bash
-   find /sessions/keen-optimistic-keller/mnt/DIHT/public -name "*.png" -size +50k 2>/dev/null
-   find /sessions/keen-optimistic-keller/mnt/DIHT/public -name "*.svg" -size +20k 2>/dev/null
+   find public -name "*.png" -size +50k 2>/dev/null
+   find public -name "*.svg" -size +20k 2>/dev/null
    ```
 
 3. **Image serving optimization**
@@ -176,18 +184,18 @@ AI-generated UIs frequently produce redundant DOM structures and unoptimized ass
    Identify how images are served in this project (CDN, storage provider, signed URLs, etc.) by checking image utility files and storage helpers. If the URL request does not include image transformation parameters (width, height, quality) and the image is displayed at thumbnail size, it is being served at full resolution. Find the image URL construction utilities (e.g., `src/utils/imageStorage.ts` or equivalent) and check whether size-limited variants are requested for list/grid contexts. A 4MB original served as an 80×80 thumbnail is a meaningful bandwidth and LCP cost.
 
    d. **CSS background images at full resolution**
-   Grep for `backgroundImage` style props or Tailwind arbitrary-value background patterns:
+   Grep for `backgroundImage` style props or utility-class arbitrary-value background patterns (e.g., Tailwind `bg-[url(...)]`):
    ```bash
    grep -rn "backgroundImage\|bg-\[url" src/components/ | grep -v "\.test\."
    ```
    Flag any that reference full-resolution image URLs without a size-limited variant.
 
-4. **Inline styles instead of utility classes**
-   Grep for `style={{` in JSX — in a Tailwind project, inline styles indicate either intentional dynamic styling or AI-generated code that bypassed the utility system:
+4. **Inline styles instead of utility classes** (utility-CSS projects only, e.g., Tailwind)
+   Grep for `style={{` in JSX — in a utility-CSS project, inline styles indicate either intentional dynamic styling or AI-generated code that bypassed the utility system:
    ```bash
    grep -rn "style={{" src/components/ | grep -v "\.test\."
    ```
-   Flag cases where the inline style is a static value that should be a Tailwind class.
+   Flag cases where the inline style is a static value that should be a utility class.
 
 5. **Unused component imports**
    TypeScript's `noUnusedLocals` will catch most of these, but look for imported components that are referenced in the file but never actually rendered (imported for a removed feature, then the import was kept).
@@ -198,7 +206,7 @@ AI-generated UIs frequently produce redundant DOM structures and unoptimized ass
 - `<img>` in a list/grid without `loading="lazy"`: **Medium** (unnecessary eager loading, LCP impact)
 - `<img>` without `srcset` in a context where multiple display sizes exist: **Medium**
 - Uncompressed PNG > 200KB with no WebP: **Medium** (storage and initial download cost)
-- Static inline style that should be a Tailwind class: **Low**
+- Static inline style that should be a utility class: **Low**
 - Unused import (TypeScript may have caught it): **Note**
 
 ---
@@ -253,13 +261,13 @@ AI models generate code that passes type checks and tests but is not written for
 
 1. **Files over 500 lines**
    ```bash
-   find /sessions/keen-optimistic-keller/mnt/DIHT/src -name "*.tsx" -o -name "*.ts" | xargs wc -l 2>/dev/null | sort -rn | head -20
+   find src -name "*.tsx" -o -name "*.ts" | xargs wc -l 2>/dev/null | sort -rn | head -20
    ```
    For any file over 500 lines: read it. Ask: can you describe what this file does in one sentence? If not, or if the answer requires multiple clauses, the file has mixed concerns and should be flagged.
 
 2. **Functions over 100 lines**
    ```bash
-   grep -n "^  const \|^  function \|^  async function \|^export function \|^export const " src/App.tsx src/components/*.tsx 2>/dev/null | head -40
+   grep -n "^  const \|^  function \|^  async function \|^export function \|^export const " src/ -r --include="*.ts" --include="*.tsx" | grep -v "\.test\." | head -40
    ```
    Use this as a starting point to identify large function bodies. A function over 100 lines that processes multiple concerns is a finding — not because of length alone, but because length is a signal to look for mixed responsibilities.
 
@@ -269,11 +277,13 @@ AI models generate code that passes type checks and tests but is not written for
    - Multi-condition filter chains with no comment explaining the business rule
    - Ternary chains spanning more than 3 conditions
 
-4. **`App.tsx` centralization health**
-   Per `CLAUDE.md`, all app state lives in `App.tsx`. Check:
-   - Is `App.tsx` under control, or has state started leaking into child components?
-   - Are handler names following the `handleX` / `onX` convention?
-   - Are new tabs registered in the `activeTab` type?
+4. **Established architectural pattern health**
+   If `CLAUDE.md`, `architecture.md`, or `docs/guidelines.md` defines where state lives, how handlers are named, or how new views and routes are registered, check new code against those rules:
+   - Is state defined where the documented pattern says it should be, or has it started leaking into other components or modules?
+   - Do handler and component names follow the documented conventions?
+   - Are new views, routes, or tabs registered the way the documented pattern requires?
+
+   If the project documents no such pattern, skip this check and note its absence in the report.
 
 5. **Magic values without constants**
    Grep for numeric and string literals used in logic that should be named constants:
@@ -288,7 +298,7 @@ AI models generate code that passes type checks and tests but is not written for
 - Function over 100 lines with multiple responsibilities: **High**
 - Non-obvious logic with no comment: **Medium**
 - Magic number/string in logic path: **Medium**
-- `App.tsx` state leak (state defined in wrong component): **High** (architectural drift from established pattern)
+- State or structure that departs from a documented architectural pattern: **High** (architectural drift from established pattern)
 
 ---
 
@@ -325,6 +335,7 @@ An observation worth tracking — a pattern that is currently fine but will beco
 ### Finding [number]: [short title]
 
 **Severity:** Critical / High / Medium / Low / Note
+**Blocking:** Yes / No — Yes if this must be resolved before QA begins (always No in Health Check mode)
 **Domain:** Bundle Contamination / Redundant Logic / DOM & Asset Bloat / Accessibility Quick-Check / Code Comprehensibility
 **Mode:** Implementation Audit / Health Check
 

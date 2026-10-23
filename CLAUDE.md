@@ -19,25 +19,31 @@ Every agent file uses YAML frontmatter followed by a markdown body:
 name: agent-name
 description: One paragraph used to determine when to invoke this agent. Be precise — this is the routing signal.
 model: sonnet
-tools: Tool1, Tool2, ...   # optional; only when the agent needs restricted or specific tool access
+tools: Tool1, Tool2, ...   # optional allow-list; only when the agent needs specific tool access
+disallowedTools: Tool1, ...  # optional deny-list; removes tools from the inherited set
 ---
 
 Agent body...
 ```
 
-All current agents use `model: sonnet`. Only `ux-reviewer` and `code-quality-reviewer` have explicit `tools:` declarations (both need Playwright browser tools and/or Bash/Glob access).
+All current agents use `model: sonnet`. Tool access:
+- `ux-reviewer` and `code-quality-reviewer` have explicit `tools:` allow-lists (Playwright browser tools and/or Read/Grep/Glob/Bash, no Write/Edit).
+- `security-reviewer`, `accessibility-reviewer`, and `analytics` use `disallowedTools: Write, Edit, NotebookEdit, Agent`. They are advisory and must not edit files, but they keep inherited browser and MCP tools.
+- All other agents inherit every tool because they write project files (code, tests, docs, decision log, status docs).
+
+Every agent except the orchestrator has a "Handoff files" section explaining that upstream outputs are read from `docs/handoffs/<task-slug>/`. Keep it identical across agents.
 
 ## Workflow architecture
 
-The `orchestrator` agent coordinates all others. It does not do domain work — it routes, validates handoffs, tracks state, and escalates to the human when blocked.
+The `orchestrator` agent coordinates all others. It does not do domain work — it routes, validates handoffs, tracks state, and escalates to the human when blocked. It must run as the main session (`claude --agent orchestrator` or `"agent": "orchestrator"` in settings), because subagents have no `AskUserQuestion` tool and cannot get plan approval or escalate mid-run. It saves every agent's output to `docs/handoffs/<task-slug>/` as numbered files, and downstream agents read from there.
 
-**Core execution loop (strict sequencing):**
+**Execution flow:**
 
 ```
-PM → [Architect, UX, Analytics, Security Reviewer pre-spec] → Developer → [Docs Writer, Security Reviewer audit, UX review, Accessibility Reviewer audit] → QA → Release/DevOps → PM (session close)
+[Product Owner] → PM → [Architect, UX] → [Analytics, Security spec review, Accessibility spec review] → Developer → Docs Writer + [Security audit, UX review, Accessibility audit, Code Quality] → QA → Release/DevOps → PM (session close)
 ```
 
-**Specialist invocation is adaptive** — not every task needs every agent. The orchestrator evaluates each task and invokes only the specialists the task warrants.
+**The core loop is strict:** PM → Developer → Docs Writer → QA → Release/DevOps → PM always runs, in that order. **Specialist invocation (brackets) is adaptive.** Not every task needs every agent; the orchestrator invokes only the specialists the task warrants. Spec reviews wait for the spec they review. This flow must match the orchestrator's workflow graph, the README, and this file.
 
 ### Agent roles at a glance
 
@@ -64,7 +70,9 @@ The orchestrator validates each agent's output before passing it forward. Key ga
 - Developer output: all acceptance criteria confirmed met, QA handoff present
 - QA verdict: APPROVED / APPROVED WITH CONDITIONS / NOT APPROVED — explicit
 
-QA findings always escalate to PM, never directly to Developer.
+QA findings always escalate to PM, never directly to Developer. The PM recommends but does not accept risk. QA conditions, shipping with Major QA findings, and Critical/High review findings go to the human. QA gets at most two rounds per task before the orchestrator escalates to the human.
+
+Every review finding format carries a `Blocking: Yes / No` field. Security and Code Quality use a five-level severity scale; the others use four levels. The orchestrator's "Severity normalization" table maps between them.
 
 ## Conventions when editing agent files
 
