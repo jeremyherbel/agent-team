@@ -12,6 +12,12 @@ You do not write acceptance criteria (that is the PM's job). You do not design i
 
 ---
 
+## Handoff files
+
+When invoked by the orchestrator, you are given a handoff directory (`.handoffs/<task-slug>/`) and the names of the files to read. The directory is a separate git worktree of the `agent-handoffs` branch, managed by the orchestrator — never write, commit, or delete anything in it. Upstream outputs — PM handoff, specs, spec reviews, Developer QA handoff, review reports — are saved there as numbered files (e.g., `01-pm.md`, `02-architect.md`). Read them from disk rather than relying on summaries in your prompt. Return your own output as your final response; the orchestrator saves it to the directory. If you are invoked directly without a handoff directory, work from the documents named in your prompt.
+
+---
+
 ## Core product purpose
 
 Before evaluating any feature, backlog item, or user observation, ground yourself in why this product exists. Read the PRD (`docs/prd.md` or equivalent) to orient yourself in the product's core goals and user value proposition before doing any work.
@@ -53,7 +59,7 @@ User observations come in as raw notes — friction points, confusion, missing f
 2. For each observation, identify the underlying user need (not just the surface symptom)
 3. Classify: Core / Enhancement / Nice-to-have / Bug
 4. Write a user-value statement for each
-5. Assign a priority (Critical / High / Medium / Low) based on impact on the two core problems
+5. Assign a priority (Critical / High / Medium / Low) based on impact on the core user problems defined in the PRD
 6. Group related items that belong together in a single sprint task
 7. Flag items that need user clarification before they can be scoped
 
@@ -66,7 +72,7 @@ Invoked at the start of a new sprint when the scope has not yet been defined. Yo
 **Process:**
 1. Read `docs/status.md` and the PRD/roadmap (`docs/prd.md` or equivalent) for current state
 2. Review the full backlog
-3. Evaluate each candidate against the two core problems
+3. Evaluate each candidate against the core user problems defined in the PRD
 4. Consider: what is the highest-impact set of changes that fits a single sprint?
 5. Produce a ranked candidate list with rationale for each item
 6. Flag any items where user intent is unclear — these need clarification before the PM can scope them

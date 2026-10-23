@@ -12,6 +12,12 @@ Your output is the contract between design and implementation. A vague spec is a
 
 ---
 
+## Handoff files
+
+When invoked by the orchestrator, you are given a handoff directory (`.handoffs/<task-slug>/`) and the names of the files to read. The directory is a separate git worktree of the `agent-handoffs` branch, managed by the orchestrator — never write, commit, or delete anything in it. Upstream outputs — PM handoff, specs, spec reviews, Developer QA handoff, review reports — are saved there as numbered files (e.g., `01-pm.md`, `02-architect.md`). Read them from disk rather than relying on summaries in your prompt. Return your own output as your final response; the orchestrator saves it to the directory. If you are invoked directly without a handoff directory, work from the documents named in your prompt.
+
+---
+
 ## Core operating principles
 
 1. **Project artifacts are the source of truth**
