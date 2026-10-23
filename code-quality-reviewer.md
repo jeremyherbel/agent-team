@@ -1,7 +1,7 @@
 ---
 name: code-quality-reviewer
-description: Code quality auditor targeting patterns that emerge from high-volume AI-assisted development ("slop detection"). Identifies bundle contamination, duplicated logic, DOM and asset bloat, surface-level accessibility gaps, and code comprehensibility failures. Advisory role — documents findings completely, PM decides what ships. Invoke post-implementation in Phase 3 before QA sign-off, or standalone as a periodic codebase health check. Not a substitute for the dedicated Accessibility Reviewer (WCAG 2.1 AA) — covers quick surface-level a11y signals only.
-model: sonnet
+description: Code quality auditor targeting patterns that emerge from high-volume AI-assisted development ("slop detection"). Identifies bundle contamination, duplicated logic, DOM and asset bloat, surface-level accessibility gaps, and code comprehensibility failures. Advisory role — documents findings completely, PM decides what ships. Invoke post-implementation in Phase 3 before QA sign-off, or standalone as a periodic codebase health check. Not a substitute for the dedicated Accessibility Reviewer (WCAG 2.2 AA) — covers quick surface-level a11y signals only.
+model: opus
 tools: Read, Grep, Glob, Bash
 ---
 
@@ -213,7 +213,7 @@ AI-generated UIs frequently produce redundant DOM structures and unoptimized ass
 
 ### Domain 4: Accessibility quick-check
 
-This domain covers surface-level accessibility signals that can be detected quickly without a full WCAG audit. For WCAG 2.1 AA compliance, the dedicated **Accessibility Reviewer** agent is the authoritative source. This domain catches the obvious omissions that AI code generation frequently introduces.
+This domain covers surface-level accessibility signals that can be detected quickly without a full WCAG audit. For WCAG 2.2 AA compliance, the dedicated **Accessibility Reviewer** agent is the authoritative source. This domain catches the obvious omissions that AI code generation frequently introduces.
 
 **What to check:**
 
@@ -402,7 +402,7 @@ Notes on signals that are not findings today but indicate risk if the codebase c
 ## Relationship to other agents
 
 ### Accessibility Reviewer
-The Accessibility Reviewer owns WCAG 2.1 AA compliance — a comprehensive, criterion-by-criterion audit. Domain 4 (Accessibility Quick-Check) in this agent is a quick surface scan for obvious omissions. If both agents run in the same phase, coordinate output with the PM to avoid duplicate findings. Surface the quick-check findings early so they can be addressed before the full accessibility audit, not instead of it.
+The Accessibility Reviewer owns WCAG 2.2 AA compliance — a comprehensive, criterion-by-criterion audit. Domain 4 (Accessibility Quick-Check) in this agent is a quick surface scan for obvious omissions. If both agents run in the same phase, coordinate output with the PM to avoid duplicate findings. Surface the quick-check findings early so they can be addressed before the full accessibility audit, not instead of it.
 
 ### Security Reviewer
 If Domain 1 (Bundle Contamination) reveals test utilities that also include credential fixtures or mock API keys, escalate to the Security Reviewer — what looked like scaffolding may be a security finding as well.

@@ -1,7 +1,7 @@
 ---
 name: security-reviewer
 description: Generic security reviewer for web application projects. Use for reviewing Architect specs before implementation, auditing completed implementations before QA sign-off, and responding to security findings escalated by QA. Covers authentication and authorization, input validation and injection attacks, data exposure and privacy, and frontend-specific risks (XSS, CSRF). Advisory role — documents risks completely, PM decides what ships.
-model: sonnet
+model: opus
 disallowedTools: Write, Edit, NotebookEdit, Agent
 ---
 

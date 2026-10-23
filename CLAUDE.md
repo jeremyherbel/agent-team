@@ -18,7 +18,7 @@ Every agent file uses YAML frontmatter followed by a markdown body:
 ---
 name: agent-name
 description: One paragraph used to determine when to invoke this agent. Be precise — this is the routing signal.
-model: sonnet
+model: opus
 tools: Tool1, Tool2, ...   # optional allow-list; only when the agent needs specific tool access
 disallowedTools: Tool1, ...  # optional deny-list; removes tools from the inherited set
 ---
@@ -26,7 +26,7 @@ disallowedTools: Tool1, ...  # optional deny-list; removes tools from the inheri
 Agent body...
 ```
 
-All current agents use `model: sonnet`. Tool access:
+All agents default to `model: opus`. The orchestrator chooses a model for each invocation (see its "Model selection" section), so keep `opus` as every file's default rather than encoding cost choices in agent files. Tool access:
 - `ux-reviewer` and `code-quality-reviewer` have explicit `tools:` allow-lists (Playwright browser tools and/or Read/Grep/Glob/Bash, no Write/Edit).
 - `security-reviewer`, `accessibility-reviewer`, and `analytics` use `disallowedTools: Write, Edit, NotebookEdit, Agent`. They are advisory and must not edit files, but they keep inherited browser and MCP tools.
 - All other agents inherit every tool because they write project files (code, tests, docs, decision log, status docs).
@@ -43,7 +43,9 @@ The `orchestrator` agent coordinates all others. It does not do domain work — 
 [Product Owner] → PM → [Architect, UX] → [Analytics, Security spec review, Accessibility spec review] → Developer → Docs Writer + [Security audit, UX review, Accessibility audit, Code Quality] → QA → Release/DevOps → PM (session close)
 ```
 
-**The core loop is strict:** PM → Developer → Docs Writer → QA → Release/DevOps → PM always runs, in that order. **Specialist invocation (brackets) is adaptive.** Not every task needs every agent; the orchestrator invokes only the specialists the task warrants. Spec reviews wait for the spec they review. This flow must match the orchestrator's workflow graph, the README, and this file.
+**Fast path.** Small, localized tasks with no API, data model, auth, user-flow, dependency, or tracking changes run only Developer → Docs Writer (if user-visible) → QA (fast-path mode) → Release/DevOps, from a task brief the human approves in place of a PM handoff. The criteria are in the orchestrator's "Task tiers" section. Any agent that finds the task does not qualify stops it, and the orchestrator proposes the full workflow.
+
+**On the full workflow, the core loop is strict:** PM → Developer → Docs Writer → QA → Release/DevOps → PM always runs, in that order. **Specialist invocation (brackets) is adaptive.** Not every task needs every agent; the orchestrator invokes only the specialists the task warrants. Spec reviews wait for the spec they review. This flow must match the orchestrator's workflow graph, the README, and this file.
 
 ### Agent roles at a glance
 
@@ -80,5 +82,6 @@ Every review finding format carries a `Blocking: Yes / No` field. Security and C
 - Output format sections (handoff formats, report formats) are consumed by the orchestrator's validation rules; changing them requires updating the orchestrator's validation checklist
 - Keep every agent fully generic. Never embed project names, file paths, absolute paths, stack assumptions (framework, styling library, build tool, branch names), or product-specific goals. When an agent needs project facts, have it discover them: read the project's docs, inspect the manifest, or detect the default branch. Phrase stack-specific checks as examples ("e.g., Tailwind") and make them conditional on the stack.
 - When you deploy these agents to a project, do not edit the copies to add project details. Put those details in the project's own docs (`CLAUDE.md`, `architecture.md`, `docs/guidelines.md`, and so on), which the agents already read.
-- Before committing, grep for leftovers: absolute paths (`/sessions/`, `/Users/`, `/home/`), hardcoded branch names (`` `master` ``, `` `main` ``), and product-specific nouns.
+- Before committing, run `python3 scripts/check_agents.py` (requires PyYAML; CI runs it on every PR). It checks frontmatter validity, the `opus` default model, that advisory agents cannot write files, that every agent appears in the orchestrator's tables and in the README and CLAUDE.md agent tables, severity scales and `Blocking` fields, identical "Handoff files" sections, a matching execution flow line in README and CLAUDE.md, and leftover absolute paths and hardcoded branch names. It cannot catch product-specific nouns; read your diff for those.
+- When adding an agent, register it in the `AGENTS` table in `scripts/check_agents.py` (display name, severity scale, whether it is advisory) along with the orchestrator, README, and CLAUDE.md tables.
 - The orchestrator's workflow state table and validation checklists must stay consistent with whatever output formats the individual agents declare

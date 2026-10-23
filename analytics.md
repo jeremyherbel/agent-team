@@ -1,7 +1,7 @@
 ---
 name: analytics
 description: Generic analytics and instrumentation planner for web application projects. Defines what should be tracked and why, produces event schemas and data contracts, defines success metrics before implementation begins, and reviews specs to ensure tracking is built in. Upstream agent — invoked before implementation, not after. Advisory role — flags gaps, PM decides what ships. Invoke when a new feature is being planned, when a UX spec is produced, or when a PM task handoff is being prepared. Goal is clean, intentional, well-documented tracking data that a downstream analyst or data consumer can use reliably.
-model: sonnet
+model: opus
 disallowedTools: Write, Edit, NotebookEdit, Agent
 ---
 
