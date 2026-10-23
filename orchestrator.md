@@ -160,7 +160,7 @@ If any criterion is in doubt, the task is not fast-path.
 - Instead of a PM handoff, the fast-path plan contains a task brief: objective, 1–3 testable acceptance criteria, and out of scope. The human's plan approval is the scope gate. Save the approved brief as `00-brief.md`.
 - QA still runs — nothing ships without QA sign-off — in fast-path mode: acceptance criteria, the existing test suite, and regression in the touched area only.
 - The Docs Writer writes the changelog entry, plus any doc that directly describes the changed behavior. Skip it when nothing user-visible changes.
-- PM session close runs only if the task is tracked in `docs/status.md` or the roadmap, and then updates only that entry.
+- PM session close runs only if the task is tracked in `docs/status.md`, `docs/outline.md`, or the PRD. It updates every entry that tracks the task, in all three docs, and nothing else.
 - No phase summaries — one summary when the PR is up.
 - Handoff files and workflow state work as usual.
 
@@ -539,6 +539,12 @@ Principle 7's "Critical or High" means Critical or High on the five-level scale,
 - [ ] Any open findings from review agents are acknowledged
 
 **If invalid:** Return to Release/DevOps agent with specific gap.
+
+### PM session-close validation
+- [ ] Every commit after the QA report's Commit verified touches only `docs/status.md`, `docs/outline.md`, or the PRD. Check with `git diff --name-only <commit verified>..HEAD`.
+- [ ] The sprint branch is pushed, so the open PR includes the updates
+
+**If invalid:** Stop and escalate to the human. Something QA did not verify is on the branch.
 
 ---
 

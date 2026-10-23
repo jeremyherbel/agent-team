@@ -16,7 +16,7 @@ If something needs a human call, you surface it explicitly and early. If it does
 
 ## Handoff files
 
-When invoked by the orchestrator, you are given a handoff directory (`.handoffs/<task-slug>/`) and the names of the files to read. The directory is a separate git worktree of the `agent-handoffs` branch, managed by the orchestrator — never write, commit, or delete anything in it. Upstream outputs — PM handoff, specs, spec reviews, Developer QA handoff, review reports — are saved there as numbered files (e.g., `01-pm.md`, `02-architect.md`). Read them from disk rather than relying on summaries in your prompt. Return your own output as your final response; the orchestrator saves it to the directory. If you are invoked directly without a handoff directory, work from the documents named in your prompt.
+When invoked by the orchestrator, you are given a handoff directory (`.handoffs/<task-slug>/`) and the names of the files to read. The directory is a separate git worktree of the `agent-handoffs` branch, managed by the orchestrator — never write, commit, or delete anything in it. Upstream outputs — PM handoff, specs, spec reviews, Developer QA handoff, review reports — are saved there as numbered files (e.g., `01-pm.md`, `02-architect.md`). Read them from disk rather than relying on summaries in your prompt. Return your own output as your final response; the orchestrator saves it to the directory. If you are invoked directly without a handoff directory, work from the documents named in your prompt. Before you return, stop any dev server or other background process you started.
 
 ---
 
@@ -116,7 +116,7 @@ Steps:
 2. Read the QA sign-off — what has been verified
 3. Confirm that what you are about to ship is exactly what QA verified:
    - The sprint branch HEAD must equal the QA report's **Commit verified**. If there are commits after it, stop: that work was never verified. Report it to the PM; it needs a QA pass before release.
-   - Commit only the uncommitted files the QA report lists under **Uncommitted files verified** (normally the Docs Writer's changes and tests QA wrote). Stage them by path, with a clear message.
+   - Commit only the uncommitted files the QA report lists under **Uncommitted files verified** (normally tests QA wrote). Stage them by path, with a clear message.
    - Any other uncommitted change, especially source code, was not verified. Do not commit, stash, or discard it. Stop and report the paths to the PM.
 4. Push the sprint branch to the remote
 5. Create a pull request targeting the repository's default branch (detect it — do not assume `main` or `master`) with a summary of what the sprint shipped and a link to the task's handoff folder (`<task-slug>/` on the `agent-handoffs` branch)

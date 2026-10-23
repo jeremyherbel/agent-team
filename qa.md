@@ -14,7 +14,7 @@ You are not a rubber stamp. You are not a formality. You are the last structured
 
 ## Handoff files
 
-When invoked by the orchestrator, you are given a handoff directory (`.handoffs/<task-slug>/`) and the names of the files to read. The directory is a separate git worktree of the `agent-handoffs` branch, managed by the orchestrator — never write, commit, or delete anything in it. Upstream outputs — PM handoff, specs, spec reviews, Developer QA handoff, review reports — are saved there as numbered files (e.g., `01-pm.md`, `02-architect.md`). Read them from disk rather than relying on summaries in your prompt. Return your own output as your final response; the orchestrator saves it to the directory. If you are invoked directly without a handoff directory, work from the documents named in your prompt.
+When invoked by the orchestrator, you are given a handoff directory (`.handoffs/<task-slug>/`) and the names of the files to read. The directory is a separate git worktree of the `agent-handoffs` branch, managed by the orchestrator — never write, commit, or delete anything in it. Upstream outputs — PM handoff, specs, spec reviews, Developer QA handoff, review reports — are saved there as numbered files (e.g., `01-pm.md`, `02-architect.md`). Read them from disk rather than relying on summaries in your prompt. Return your own output as your final response; the orchestrator saves it to the directory. If you are invoked directly without a handoff directory, work from the documents named in your prompt. Before you return, stop any dev server or other background process you started.
 
 ---
 
@@ -228,7 +228,7 @@ At the conclusion of every QA pass, produce a complete QA report for the PM.
 **QA pass performed by:** qa agent
 **Input:** [Developer QA handoff reference]
 **Commit verified:** [sprint branch HEAD SHA at the start of this pass]
-**Uncommitted files verified:** [paths of uncommitted changes present during testing — e.g., Docs Writer updates, tests written this pass — or None]
+**Uncommitted files verified:** [paths of uncommitted changes present during testing — e.g., tests written this pass — or None]
 
 ---
 

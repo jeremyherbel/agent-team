@@ -14,6 +14,17 @@ claude --agent orchestrator
 
 The sandbox is a fresh git repo with the agents installed in `.claude/agents/`. Its `origin` is a bare repo next to it (`/tmp/tasklist-run/remote.git`), so pushes stay on your machine. Release/DevOps can't open a real PR there; it should report that rather than fail silently.
 
+## What a run costs
+
+Each run starts real Claude sessions billed to your account, and most agents run on Opus. Measured on `tasklist`:
+
+| Task | Path | Agent runs | Cost | Time |
+|---|---|---|---|---|
+| Task 1 (blank titles) | Fast path, start to finish | 5 | about $2.30 | about 5 minutes |
+| Task 2 (due dates) | Full workflow, stopped before QA round 2 | about 20 | over $20 | about 40 minutes |
+
+Start with Task 1. Run Task 2 only when you want to exercise the full workflow, and expect to answer several decision checkpoints along the way.
+
 ## `tasklist`
 
 A to-do list with no framework and no dependencies (`npm start`, `npm test`). It has deliberate rough edges.
