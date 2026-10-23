@@ -36,7 +36,7 @@ Small tasks take a **fast path**: Developer → Docs Writer (only if user-visibl
 
 Every agent defaults to Opus. The orchestrator chooses the model for each invocation — Sonnet or Haiku for well-specified or mechanical work, Opus for judgment calls (always for the Architect and Security Reviewer) — and lists its choices in the plan for you to approve or change.
 
-Risk acceptance stays with you: the PM agent recommends, but QA conditions, shipping with Major QA findings, and Critical/High review findings are escalated to you to decide.
+After you approve the plan, the team works without you. It stops only for decisions that are genuinely yours: accepting risk on a serious problem the change introduced or made worse, a critical existing problem, a scope change, a conflict between agents, or going more than 50% over the plan's agent-run budget. Existing problems the reviewers notice go to the backlog instead of into the task.
 
 ## Usage
 

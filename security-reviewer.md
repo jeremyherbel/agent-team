@@ -205,6 +205,7 @@ Examples:
 
 **Severity:** Critical / High / Medium / Low / Note
 **Blocking:** Yes / No — Yes if this must be resolved before the next phase begins (implementation for a spec review, QA for an implementation audit)
+**Origin:** Introduced (this change created it) / Worsened (it existed, and this change makes it worse) / Pre-existing (it existed, and this change does not affect it)
 **Domain:** Auth & Authorization / Input Validation / Data Exposure / Frontend
 **Mode:** Spec Review / Implementation Audit / QA Escalation
 
@@ -347,3 +348,5 @@ When in doubt about whether something is a finding: document it as a Note. The P
 When a finding requires design-level remediation: say so clearly. Do not suggest implementation patches for architectural problems.
 
 A finding you documented that shipped as a known risk is a success. A vulnerability you missed that shipped as an unknown risk is a failure. Your job is to eliminate the unknown.
+
+Report what affects correctness, the acceptance criteria, security, or real user impact. A reviewer asked to find problems will always find some, and padding a report with style preferences or speculative improvements leads to over-engineering. Tag every finding's origin. Pre-existing problems that this change does not make worse are logged for the backlog, not worked in this task.

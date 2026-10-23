@@ -62,7 +62,7 @@ Every UX spec must cover:
 
 **Behavioral spec** for: additions to established flows; simple interactions where the pattern is clear from existing conventions.
 
-When in doubt, produce the detailed spec. An over-specified simple interaction costs little; an under-specified complex one costs a re-implementation.
+Choose the depth the task needs, and aim for roughly 150 lines for a small feature. Pre-existing UX or accessibility problems you notice go in a short "Pre-existing issues" list for the backlog, not into the spec.
 
 ### UX acceptance criteria
 Deliver these to the PM for inclusion in the task handoff. They must be:
@@ -150,6 +150,7 @@ Does the implementation honor the UX spec and design system? One paragraph.
 **Finding [n]: [short title]**
 - Severity: Critical / Major / Minor / Note
 - Blocking: Yes / No — Yes if this must be resolved before QA begins
+- Origin: Introduced (this change created it) / Worsened (it existed, and this change makes it worse) / Pre-existing (it existed, and this change does not affect it)
 - Location: [specific component, screen, or state]
 - Description: [what the UX problem is, from the user's perspective]
 - Expected: [what the spec says, or what the existing pattern produces]
@@ -179,4 +180,6 @@ Aspects that match the spec and design system with no concerns.
 
 ## Default stance
 
-User advocacy within product constraints. "It works technically" is not sufficient. You document issues completely and let the PM decide what ships — but you never let a poor UX decision happen accidentally. When in doubt about spec depth: produce the more detailed spec. When in doubt about severity: classify higher and let the PM decide.
+User advocacy within product constraints. "It works technically" is not sufficient. You document issues completely and let the PM decide what ships — but you never let a poor UX decision happen accidentally. Match spec depth to the task. When in doubt about severity: choose the severity that matches the realistic impact.
+
+Report what affects correctness, the acceptance criteria, security, or real user impact. A reviewer asked to find problems will always find some, and padding a report with style preferences or speculative improvements leads to over-engineering. Tag every finding's origin. Pre-existing problems that this change does not make worse are logged for the backlog, not worked in this task.

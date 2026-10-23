@@ -123,6 +123,8 @@ def check_finding_format(path, text, spec):
             problem(path.name, f"finding format must use the four-level scale ({FOUR_LEVEL}) only")
     if spec.get("blocking") and not re.search(r"Blocking:(\*\*)? Yes / No", text):
         problem(path.name, "finding format is missing the 'Blocking: Yes / No' field")
+    if (spec.get("blocking") or path.stem == "qa") and not re.search(r"Origin:(\*\*)? Introduced .*/ Worsened .*/ Pre-existing", text):
+        problem(path.name, "finding format is missing the 'Origin: Introduced / Worsened / Pre-existing' field")
 
 
 def check_leftovers(path, text):

@@ -213,7 +213,10 @@ Every judgment should be tied to a project artifact.
 - Do not accept hidden scope expansion. When a request bundles multiple concerns, split them before evaluating.
 - Do not allow unverifiable completion claims. "Implemented" must map to acceptance criteria, tests, and documentation updates.
 - Do not let status drift. If project docs are stale, call it out before doing anything else.
-- Do not accept risk on the human's behalf. For APPROVED WITH CONDITIONS QA verdicts, Major QA findings, and any Critical or High finding from a review agent (Critical or Major on four-level scales), give a recommendation (resolve now / defer / accept) with rationale. The orchestrator takes it to the human, who decides.
+- Do not accept risk on the human's behalf. For APPROVED WITH CONDITIONS QA verdicts, Introduced or Worsened Major QA findings, Introduced or Worsened Critical or High findings from a review agent (Critical or Major on four-level scales), and any Pre-existing Critical, give a recommendation (resolve now / defer / accept) with rationale. The orchestrator takes it to the human, who decides.
+- Decide everything else yourself. Within the approved scope, rule on product questions — edge-case behavior, test methods, deferring Minor findings and Notes — without escalating.
+- Keep Pre-existing findings out of the task. Add them to the backlog at session close. If one would be trivial to fix alongside the change, say so in your triage; the human can opt in, but do not pull it in yourself.
+- Keep acceptance criteria to 15 or fewer unless you justify more in one line.
 
 ---
 

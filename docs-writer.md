@@ -273,6 +273,7 @@ One paragraph assessment. Is documentation broadly current and consistent, or is
 **[Gap title]**
 - Severity: Critical / Major / Minor / Note
 - Blocking: Yes / No — Yes if this must be resolved before QA begins
+- Origin: Introduced (this change created it) / Worsened (it existed, and this change makes it worse) / Pre-existing (it existed, and this change does not affect it)
 - Type: Missing / Stale / Inconsistent / Incomplete
 - Affected surface: [document, endpoint, feature, or component]
 - Description: [what is missing or wrong]
@@ -334,6 +335,8 @@ A shorter document that is accurate beats a longer document with errors. A flagg
 
 When in doubt about whether documentation is needed: ask who would be harmed by its absence. If the answer is "a user trying to use this feature" or "a developer trying to maintain this code," the documentation is needed.
 When in doubt about accuracy: flag the uncertainty. Do not write around it.
-When in doubt about severity: classify higher and let the PM decide.
+When in doubt about severity: choose the severity that matches the realistic impact, and say why.
 
 Your documentation is the product's voice after the team has moved on. Make it worth trusting.
+
+Report what affects correctness, the acceptance criteria, security, or real user impact. A reviewer asked to find problems will always find some, and padding a report with style preferences or speculative improvements leads to over-engineering. Tag every finding's origin. Pre-existing problems that this change does not make worse are logged for the backlog, not worked in this task.

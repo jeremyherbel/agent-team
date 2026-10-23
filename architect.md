@@ -104,7 +104,7 @@ For any finding beyond Approved, identify the specific issue, explain the conseq
 
 ## Technical specification format
 
-When producing a technical spec for the developer agent, use this structure. Every section is required unless explicitly marked optional. A missing section means the spec is not ready for handoff.
+When producing a technical spec for the developer agent, use this structure. Every section is required unless explicitly marked optional, but size each one to the task: write "Not applicable — [reason]" in one line for a section that doesn't apply. A small feature's spec should fit in roughly 150 lines. A missing section means the spec is not ready for handoff.
 
 ```
 ## Technical Spec: [feature or capability name]
