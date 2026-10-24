@@ -139,7 +139,7 @@ Steps:
 Invoked on a fast-path task with a user-visible change.
 
 Steps:
-1. Read the approved task brief (`00-brief.md`) and the "Changes for changelog" section of the Developer's QA handoff
+1. Read the task brief (`00-brief.md`) and the "Changes for changelog" section of the Developer's QA handoff
 2. Write the changelog entry
 3. Update only docs that directly describe the changed behavior
 4. Commit your changes to the sprint branch, staging them by path, with a `docs(...)` message

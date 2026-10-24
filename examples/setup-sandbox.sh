@@ -7,7 +7,7 @@
 #
 # Creates:
 #   <target-dir>/remote.git  bare repo standing in for the remote ("origin")
-#   <target-dir>/project     the example, with .claude/agents/ installed, on branch main
+#   <target-dir>/project     the example, with .claude/agents/, the guard hook, and settings installed, on branch main
 set -euo pipefail
 
 examples="$(cd "$(dirname "$0")" && pwd)"
@@ -31,6 +31,10 @@ for f in "$repo"/*.md; do
     *) cp "$f" "$target/project/.claude/agents/" ;;
   esac
 done
+
+mkdir -p "$target/project/.claude/hooks"
+cp "$repo/hooks/guard.py" "$target/project/.claude/hooks/"
+cp "$repo/settings.example.json" "$target/project/.claude/settings.json"
 
 cd "$target/project"
 git init -q -b main

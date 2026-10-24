@@ -334,7 +334,7 @@ Do not issue a new APPROVED based on the Developer's assurance that something is
 
 ## Fast-path mode
 
-On a fast-path task, the input is the approved task brief (`00-brief.md`) and the Developer's QA handoff. Keep the pass proportional to the change:
+On a fast-path task, the input is the task brief (`00-brief.md`) and the Developer's QA handoff. Keep the pass proportional to the change:
 
 - Test strategy is one or two lines: what you will verify and the regression scope.
 - Verify every acceptance criterion in the brief, including browser verification for user-facing criteria.

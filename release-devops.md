@@ -112,7 +112,7 @@ Steps:
 Invoked at the end of each sprint after QA sign-off.
 
 Steps:
-1. Read the PM's sprint scope — what was built and tested (on a fast-path task, the approved task brief, `00-brief.md`)
+1. Read the PM's sprint scope — what was built and tested (on a fast-path task, the task brief, `00-brief.md`)
 2. Read the QA sign-off — what has been verified
 3. Confirm that what you are about to ship is exactly what QA verified:
    - The sprint branch HEAD must equal the QA report's **Commit verified**. If there are commits after it, stop: that work was never verified. Report it to the PM; it needs a QA pass before release.
