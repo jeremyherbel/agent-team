@@ -47,7 +47,7 @@
         "Lists saved before this change still load without losing tasks",
         "The date input has an accessible label",
         "Unit tests cover the overdue logic, including the boundary around today",
-        "Pre-existing problems not made worse by the change were left for the backlog rather than fixed in this PR"
+        "Pre-existing problems that the change doesn't touch were left for the backlog. Fixes to problems the feature introduces or makes worse, such as accessibility of controls it adds or changes, are expected"
       ]
     }
   ]

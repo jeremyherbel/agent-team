@@ -34,11 +34,13 @@ HANDOFF_BRANCH = "agent-handoffs"
 # Signs that the orchestrator stopped to wait for a human.
 WAITING = re.compile(
     r"awaiting your approval|approve to proceed|workflow blocked|decisions? (?:only you|for you)"
-    r"|needs? your (?:decision|approval|input)|reply \"|\?\s*$",
+    r"|needs? your (?:decision|approval|input)|waiting on your|awaiting (?:your|the human)|your (?:call|answer|decision)"
+    r"|choose one|reply \"|\?\s*$",
     re.I,
 )
 FIRST_REPLY = "Approved. Proceed."
 LATER_REPLY = "Follow the PM's recommendation on every open decision, and proceed."
+NUDGE = "Continue."  # sent when the orchestrator stopped without asking anything
 
 
 def load_tasks():
@@ -112,7 +114,14 @@ def handoff_files(remote):
 
 
 def release_done(remote):
-    return any("release" in Path(f).name for f in handoff_files(remote))
+    """True when every task folder with a state file also has a release handoff."""
+    folders = {}
+    for f in handoff_files(remote):
+        parts = Path(f).parts
+        if len(parts) == 2:
+            folders.setdefault(parts[0], set()).add(parts[1])
+    tasks = [names for names in folders.values() if "state.md" in names]
+    return bool(tasks) and all(any("release" in n for n in names) for names in tasks)
 
 
 # ---------------------------------------------------------------- scoring
@@ -156,10 +165,13 @@ def score(run_dir, task, use_judge=False):
     first_texts = "\n".join(turns[0]["texts"] + [turns[0]["final"]]) if turns else ""
     handoffs = handoff_files(remote)
     names = [Path(f).name for f in handoffs]
-    # The fast path posts its brief and starts at once, so the saved brief is the reliable signal.
-    if any(n.startswith("00-brief") for n in names) or "Fast-Path Plan" in first_texts:
+    # The first plan is the strongest signal. The fast path starts without waiting, so its brief may only
+    # exist on disk; but a full-workflow run can also spawn a fast-path sub-task, so check the plan text first.
+    if "Execution Plan" in first_texts:
+        tier = "full"
+    elif "Fast-Path Plan" in first_texts or any(n.startswith("00-brief") for n in names):
         tier = "fast"
-    elif "Execution Plan" in first_texts or any(n.startswith("01-pm") for n in names):
+    elif any(n.startswith("01-pm") for n in names):
         tier = "full"
     else:
         tier = "unknown"
@@ -175,7 +187,8 @@ def score(run_dir, task, use_judge=False):
         "run_dir": str(run_dir),
         "tier": tier,
         "tier_correct": tier == task["expected_tier"],
-        "human_replies": max(len(turns) - 1, 0),
+        "human_replies": meta.get("decision_replies", max(len(turns) - 1, 0)),
+        "nudges": meta.get("nudges", 0),
         "agent_runs": sum(len(t["agents"]) for t in turns),
         "agents": [a for t in turns for a in t["agents"]],
         # A resumed (--continue) session reports the conversation's running total, so the last turn's figure is the cost.
@@ -186,7 +199,7 @@ def score(run_dir, task, use_judge=False):
         "default_branch_untouched": default_untouched,
         "work_branch": branch,
         "handoffs_saved": any(f.endswith("state.md") for f in handoffs),
-        "release_done": any("release" in Path(f).name for f in handoffs),
+        "release_done": release_done(remote),
         "budget_exhausted": meta.get("budget_exhausted", False),
         "leftover_processes": meta.get("leftover_processes", 0),
     }
@@ -239,6 +252,9 @@ def run_one(task, run_dir, permission_mode, max_turns):
             "initial_default_sha": remote_heads(remote).get("main"), "permission_mode": permission_mode}
 
     spent, message, started = 0.0, task["prompt"], time.monotonic()
+    meta.update(decision_replies=0, nudges=0)
+    # Keep headless runs open until background subagents finish instead of dropping them after 10 idle minutes.
+    env = {**os.environ, "CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS": "0"}
     for turn in range(1, max_turns + 1):
         remaining = task["budget_usd"] - spent
         # --max-budget-usd caps each invocation; passing what's left of the task budget keeps the
@@ -251,14 +267,19 @@ def run_one(task, run_dir, permission_mode, max_turns):
         if turn > 1:
             args.insert(2, "--continue")
         with open(run_dir / f"turn{turn}.jsonl", "w") as out, open(run_dir / f"turn{turn}.err", "w") as err:
-            subprocess.run(args + [message], cwd=project, stdout=out, stderr=err, timeout=3 * 3600)
+            subprocess.run(args + [message], cwd=project, stdout=out, stderr=err, env=env, timeout=3 * 3600)
         summary = summarize_turn(read_events(run_dir / f"turn{turn}.jsonl"))
         # The reported cost is the conversation's running total, earlier turns included.
         print(f"  turn {turn}: ${summary['cost'] - spent:.2f} (total ${summary['cost']:.2f})", flush=True)
         spent = max(spent, summary["cost"])
-        if release_done(remote) or not WAITING.search(summary["final"].strip()):
+        if release_done(remote):
             break
-        message = FIRST_REPLY if turn == 1 else LATER_REPLY
+        if WAITING.search(summary["final"].strip()):
+            message = FIRST_REPLY if turn == 1 else LATER_REPLY
+            meta["decision_replies"] += 1
+        else:
+            message = NUDGE
+            meta["nudges"] += 1
 
     leftovers = processes_under(run_dir)
     for pid in leftovers:
@@ -277,14 +298,14 @@ def report(results_dir):
     rows = [json.loads(p.read_text()) for p in sorted(Path(results_dir).glob("*/result.json"))]
     if not rows:
         return "No results found."
-    lines = ["| Task | Run | Finished | Tier ok | Tests | Hidden | Judge | Human replies | Agent runs | Cost | Minutes | Guard blocks | Default branch safe |",
-             "|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
+    lines = ["| Task | Run | Finished | Tier ok | Tests | Hidden | Judge | Human replies | Nudges | Agent runs | Cost | Minutes | Guard blocks | Default branch safe |",
+             "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
     for r in rows:
         j = r.get("judge") or {}
         judge_cell = f"{j['passed']}/{j['total']}" if "passed" in j else ("error" if j else "—")
         yes = lambda v: "yes" if v else "**no**"
         lines.append(f"| {r['task']} | {Path(r['run_dir']).name} | {yes(r['release_done'])} | {yes(r['tier_correct'])} ({r['tier']}) | {yes(r['tests_pass'])} | "
-                     f"{yes(r['hidden_pass'])} | {judge_cell} | {r['human_replies']} | {r['agent_runs']} | ${r['cost_usd']:.2f} | "
+                     f"{yes(r['hidden_pass'])} | {judge_cell} | {r['human_replies']} | {r.get('nudges', 0)} | {r['agent_runs']} | ${r['cost_usd']:.2f} | "
                      f"{r['duration_min']} | {r['guard_blocks']} | {yes(r['default_branch_untouched'])} |")
     total = sum(r["cost_usd"] for r in rows)
     lines.append(f"\nTotal agent cost: ${total:.2f} across {len(rows)} runs (judge cost not included).")

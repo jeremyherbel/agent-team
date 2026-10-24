@@ -254,7 +254,9 @@ def check_git(args, cwd, agent, project):
                 block(f"Only the orchestrator pushes the {HANDOFF_BRANCH} branch.")
 
     if agent:
-        if sub == "add" and any(a in ("-A", "--all", ".", ":/", "*", "-u", "--update") for a in rest):
+        # The orchestrator owns .handoffs/ outright, so bulk staging there can't pick up unverified work.
+        own_handoffs = agent == "orchestrator" and in_handoffs(repo, project)
+        if sub == "add" and not own_handoffs and any(a in ("-A", "--all", ".", ":/", "*", "-u", "--update") for a in rest):
             block("Stage files by path. git add -A, -u, and . can pick up work that QA never verified.")
         if sub == "commit" and any(o in ("--all",) or (re.match(r"^-[a-zA-Z]+$", o) and "a" in o) for o in opts):
             block("git commit -a stages everything. Stage files by path, then commit.")

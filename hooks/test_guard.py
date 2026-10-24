@@ -163,6 +163,13 @@ class GuardTest(unittest.TestCase):
         self.assertBlocked("cp report.md .handoffs/t/", agent="qa")
         self.assertBlocked("cp -t .handoffs/t report.md", agent="qa")
 
+    def test_orchestrator_may_bulk_stage_handoffs(self):
+        handoffs = os.path.join(self.project, ".handoffs")
+        self.assertAllowed("git add . && git commit -m 'x: add 01-pm'", agent="orchestrator", cwd=handoffs)
+        self.assertAllowed("git -C .handoffs add -A", agent="orchestrator")
+        self.assertBlocked("git add .", agent="orchestrator")  # the code checkout is still staged by path
+        self.assertBlocked("git add .", agent="developer", cwd=handoffs)
+
     def test_bad_input_is_ignored(self):
         result = subprocess.run([sys.executable, GUARD], input="not json", capture_output=True, text=True)
         self.assertEqual(result.returncode, 0)
