@@ -1,0 +1,48 @@
+{
+  "tasks": [
+    {
+      "id": "blank-titles",
+      "example": "tasklist",
+      "expected_tier": "fast",
+      "budget_usd": 6,
+      "prompt": "Users can add blank tasks made of spaces. Reject blank or whitespace-only titles, and trim whitespace from titles.",
+      "hidden_checks": ["node --test .eval-hidden/blank-titles.test.js"],
+      "rubric": [
+        "Whitespace-only titles are rejected and titles are trimmed, implemented in the task logic (public/tasks.js), not only in the UI",
+        "Unit tests cover the new behavior",
+        "The change stays in scope: no unrelated features or refactors",
+        "A changelog entry describes the fix"
+      ]
+    },
+    {
+      "id": "counter-plural",
+      "example": "tasklist",
+      "expected_tier": "fast",
+      "budget_usd": 6,
+      "prompt": "The counter under the task list says \"1 tasks left\". Make it read \"1 task left\" when exactly one task remains, and keep \"N tasks left\" otherwise, including \"0 tasks left\".",
+      "hidden_checks": ["node .eval-hidden/counter-plural.check.cjs"],
+      "rubric": [
+        "The counter reads \"1 task left\" for one remaining task and \"N tasks left\" otherwise, including 0",
+        "The change stays in scope: no unrelated features or refactors",
+        "A changelog entry describes the fix"
+      ]
+    },
+    {
+      "id": "due-dates",
+      "example": "tasklist",
+      "expected_tier": "full",
+      "budget_usd": 20,
+      "prompt": "Let users give a task an optional due date. Incomplete tasks that are past their due date should be clearly highlighted.",
+      "hidden_checks": ["node --test .eval-hidden/due-dates.test.js"],
+      "rubric": [
+        "A task can be given an optional due date, and tasks without one still work",
+        "Overdue incomplete tasks are clearly highlighted, not by color alone",
+        "Completed tasks are never highlighted as overdue",
+        "Lists saved before this change still load without losing tasks",
+        "The date input has an accessible label",
+        "Unit tests cover the overdue logic, including the boundary around today",
+        "Pre-existing problems not made worse by the change were left for the backlog rather than fixed in this PR"
+      ]
+    }
+  ]
+}

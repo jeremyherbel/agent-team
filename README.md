@@ -98,3 +98,5 @@ The agents expect certain project documentation to exist — `docs/status.md`, `
 ## Trying it out
 
 [`examples/`](examples/) has a small sample project with its docs filled in and ready-made tasks: one for the fast path and one for the full workflow. `examples/setup-sandbox.sh` copies an example into a throwaway git repo with the agents installed, so a test run can't touch your real repositories.
+
+[`evals/`](evals/) runs tasks on the examples end to end and scores the results (tests, hidden checks, human interruptions, agent runs, cost), so a change to the agents can be measured against a baseline. Runs cost real money; see its README.
