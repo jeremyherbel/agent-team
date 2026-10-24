@@ -191,6 +191,9 @@ def main():
         check_frontmatter(path, text)
         check_finding_format(path, text, spec)
         check_leftovers(path, text)
+        for ref in re.findall(r"\.claude/agent-reference/([\w.-]+\.md)", text):
+            if not (root / "reference" / ref).exists():
+                problem(path.name, f"points to .claude/agent-reference/{ref}, but reference/{ref} does not exist")
         if path.stem == "orchestrator":
             check_orchestrator(text)
         else:

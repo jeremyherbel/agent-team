@@ -51,6 +51,8 @@ your-project/
         └── ...
 ```
 
+Copy `reference/` to `.claude/agent-reference/` as well. It holds templates that agents read only when they need them (for example, Release/DevOps's runbook and rollback templates). Keep it outside `.claude/agents/`, so Claude Code doesn't load the templates as agents.
+
 Then run the orchestrator as your **main session** — not as a subagent:
 
 ```bash

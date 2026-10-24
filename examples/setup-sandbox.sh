@@ -32,6 +32,9 @@ for f in "$repo"/*.md; do
   esac
 done
 
+mkdir -p "$target/project/.claude/agent-reference"
+cp "$repo"/reference/*.md "$target/project/.claude/agent-reference/"
+
 mkdir -p "$target/project/.claude/hooks"
 cp "$repo/hooks/guard.py" "$target/project/.claude/hooks/"
 cp "$repo/settings.example.json" "$target/project/.claude/settings.json"
