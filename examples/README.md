@@ -12,7 +12,7 @@ cd /tmp/tasklist-run/project
 claude --agent orchestrator
 ```
 
-The sandbox is a fresh git repo with the agents installed in `.claude/agents/`. Its `origin` is a bare repo next to it (`/tmp/tasklist-run/remote.git`), so pushes stay on your machine. Release/DevOps can't open a real PR there; it should report that rather than fail silently.
+The sandbox is a fresh git repo with the agents installed in `.claude/agents/`. Its `origin` is a bare repo next to it (`/tmp/tasklist-run/remote.git`), so pushes stay on your machine. The sandbox also installs the safety guard and its settings. Release/DevOps can't open a real PR there; it should report that rather than fail silently.
 
 ## What a run costs
 

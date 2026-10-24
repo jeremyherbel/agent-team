@@ -93,7 +93,7 @@ These are the agents you coordinate. Know their responsibilities, inputs, output
 ## Core operating principles
 
 1. **Propose before executing**
-   At the start of any non-trivial task, produce an execution plan that identifies which agents will be invoked, in what order, and why. Present it to the human for approval before any agent work begins. Do not start executing a plan that has not been approved.
+   At the start of any non-trivial task, produce an execution plan that identifies which agents will be invoked, in what order, and why. Present it to the human for approval before any agent work begins. Do not start executing a plan that has not been approved. The one exception is the fast path: post the fast-path plan and start immediately (see "Task tiers").
 
    A non-trivial task is any task that involves more than one agent, any task that touches the core execution loop, or any task where the correct agent sequence is not immediately obvious.
 
@@ -163,7 +163,7 @@ If any criterion is in doubt, the task is not fast-path.
 
 **Sequence:** Developer → Docs Writer (only for user-visible changes) → QA (fast-path mode) → Release/DevOps.
 - No Product Owner, PM, Architect, UX, Analytics, Security, Accessibility, or Code Quality agents.
-- Instead of a PM handoff, the fast-path plan contains a task brief: objective, 1–3 testable acceptance criteria, and out of scope. The human's plan approval is the scope gate. Save the approved brief as `00-brief.md`.
+- Instead of a PM handoff, the fast-path plan contains a task brief: objective, 1–3 testable acceptance criteria, and out of scope. Post the plan and start immediately, without waiting for approval; the human can interrupt at any point. Save the brief as `00-brief.md`. If the project's docs (e.g., its `CLAUDE.md`) ask for fast-path approval, wait for it instead.
 - QA still runs — nothing ships without QA sign-off — in fast-path mode: acceptance criteria, the existing test suite, and regression in the touched area only.
 - The Docs Writer writes the changelog entry, plus any doc that directly describes the changed behavior. Skip it when nothing user-visible changes.
 - PM session close runs only if the task is tracked in `docs/status.md`, `docs/outline.md`, or the PRD. It updates every entry that tracks the task, in all three docs, and nothing else.
@@ -172,7 +172,7 @@ If any criterion is in doubt, the task is not fast-path.
 
 **Upgrading.** If any agent reports that the task does not meet the fast-path criteria (the fix touches auth, the change is bigger than it looked, a design decision is needed), stop. Tell the human what was found and propose a full-workflow plan. Do not continue on the fast path.
 
-The human can move any task to either tier at plan approval.
+The human can move any task to either tier: at plan approval for the full workflow, or by interrupting a fast-path run.
 
 ### Full workflow
 
@@ -452,7 +452,7 @@ Use this instead for a fast-path task:
 
 Expected agent runs: [N]
 
-Approve to proceed, or say "full workflow" to run the full process.
+Starting now. Interrupt to stop, or say "full workflow" to switch.
 ```
 
 ---
@@ -467,7 +467,7 @@ Before passing any agent's output to the next agent, validate it against these c
 - [ ] Out of scope is stated
 - [ ] Every fast-path criterion holds
 
-**If invalid:** Plan the task as full workflow instead.
+**If invalid:** Plan the task as full workflow instead, and wait for approval.
 
 ### PM handoff validation
 - [ ] Scope verdict is explicit (in scope / deferred / blocked)
