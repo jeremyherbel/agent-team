@@ -100,6 +100,7 @@ def strip_heredocs(command):
 def tokenize(command):
     lexer = shlex.shlex(strip_heredocs(command), posix=True, punctuation_chars=True)
     lexer.whitespace = " \t\r"  # keep newlines as command separators
+    lexer.wordchars += "$" + "{}"  # keep $VAR/path and ${VAR} as one word
     lexer.commenters = "#"
     return list(lexer)
 
@@ -131,6 +132,42 @@ def strip_prefix(words):
         else:
             break
     return words[i:]
+
+
+ASSIGNMENT = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)=(.*)$", re.S)
+VARIABLE = re.compile(r"\$\{([A-Za-z_][A-Za-z0-9_]*)\}|\$([A-Za-z_][A-Za-z0-9_]*)")
+
+
+def record_assignments(words, variables):
+    """Remember VAR=value from a segment that only assigns (optionally after export)."""
+    body = words[1:] if words[:1] == ["export"] else words
+    if body and all(ASSIGNMENT.match(w) for w in body):
+        for w in body:
+            name, value = ASSIGNMENT.match(w).groups()
+            variables[name] = expand(value, variables)[0]
+        return True
+    return False
+
+
+def expand(word, variables):
+    """Expand $VAR and ${VAR} from earlier assignments, then the environment.
+    Returns (expanded, fully_resolved)."""
+    resolved = True
+
+    def sub(m):
+        nonlocal resolved
+        name = m.group(1) or m.group(2)
+        if name in variables:
+            return variables[name]
+        if name in os.environ:
+            return os.environ[name]
+        resolved = False
+        return m.group(0)
+
+    out = VARIABLE.sub(sub, word)
+    if "$" in out:
+        resolved = False
+    return out, resolved
 
 
 def redirect_targets(words):
@@ -240,16 +277,25 @@ def check_bash(command, data, agent, project, depth=0):
 
     cwd = data.get("cwd") or project
     temps = temp_dirs(data)
+    variables = {}
     prev_cmd = None
     for words, piped in segments(tokens):
+        if record_assignments(words, variables):
+            continue
         targets = redirect_targets(words)
         words = strip_prefix(without_redirects(words))
         if not words:
             continue
         cmd, args = os.path.basename(words[0]), words[1:]
 
-        if cmd == "cd" and args and not args[0].startswith(("$", "-")):
-            cwd = resolve(args[0], cwd)
+        def paths(items):
+            """Expanded path arguments, with a flag for ones that still hold unknown variables."""
+            return [expand(a, variables) for a in items if not a.startswith("-")]
+
+        if cmd == "cd" and args:
+            target, known = expand(args[0], variables)
+            if known and not target.startswith("-"):
+                cwd = resolve(target, cwd)
 
         if cmd in ("sudo", "doas", "su"):
             block(f"{cmd} is not allowed. Agents never need elevated privileges.")
@@ -265,8 +311,10 @@ def check_bash(command, data, agent, project, depth=0):
                 check_bash(inner, data, agent, project, depth + 1)
 
         if cmd == "rm" and any(a == "--recursive" or (re.match(r"^-[a-zA-Z]+$", a) and re.search("[rR]", a)) for a in args):
-            for target in (a for a in args if not a.startswith("-")):
-                if target.startswith(("$", "~")) or target in ("/", "/*", ".."):
+            for target, known in paths(args):
+                if not known:
+                    block(f"Recursive delete of {target!r} is not allowed: it depends on a variable the guard can't resolve.")
+                if target in ("/", "/*", "..", "~"):
                     block(f"Recursive delete of {target!r} is not allowed.")
                 path = resolve(target, cwd)
                 if path == project or not (inside(path, project) or any(inside(path, t) for t in temps)):
@@ -275,16 +323,22 @@ def check_bash(command, data, agent, project, depth=0):
         if cmd == "git":
             check_git(args, cwd, agent, project)
 
-        if agent and cmd in READERS and any(is_secret_file(a) for a in args if not a.startswith("-")):
+        if agent and cmd in READERS and any(is_secret_file(a) for a, _ in paths(args)):
             block("Agents don't read .env files; secrets would end up in transcripts and handoffs. Use .env.example for variable names.")
 
         if agent and agent != "orchestrator":
-            writes = targets[:]
-            if cmd in ("rm", "mv", "cp", "tee", "touch", "mkdir", "rmdir", "ln", "truncate"):
-                writes += [a for a in args if not a.startswith("-")]
+            writes = [expand(t, variables) for t in targets]
+            if cmd in ("rm", "mv", "tee", "touch", "mkdir", "rmdir", "truncate"):
+                writes += paths(args)  # mv modifies its sources too
+            elif cmd in ("cp", "ln", "install"):
+                if "-t" in args and args.index("-t") + 1 < len(args):
+                    writes.append(expand(args[args.index("-t") + 1], variables))
+                elif paths(args):
+                    writes.append(paths(args)[-1])  # only the destination is written
             if cmd == "sed" and any(a.startswith("-i") or a == "--in-place" for a in args):
-                writes += [a for a in args if not a.startswith("-")]
-            if any(in_handoffs(resolve(w, cwd), project) for w in writes):
+                writes += paths(args)
+            # A path with an unknown variable can't be placed; the rm rule above covers the dangerous case.
+            if any(known and in_handoffs(resolve(w, cwd), project) for w, known in writes):
                 block("Only the orchestrator writes to .handoffs/. Read handoff files; return your output instead.")
 
         prev_cmd = cmd

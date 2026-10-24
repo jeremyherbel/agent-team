@@ -148,6 +148,21 @@ class GuardTest(unittest.TestCase):
         self.assertAllowed("cat .env.example", agent="qa")
         self.assertAllowed("grep -rn VITE_ src/", agent="security-reviewer")
 
+    def test_shell_variables_are_expanded(self):
+        # Seen in eval runs: QA working in its scratch folder through $S, with its shell inside .handoffs/.
+        handoffs = os.path.join(self.project, ".handoffs")
+        scratch = tempfile.gettempdir()
+        for cmd in (f"S={scratch}/qa; mkdir -p $S; echo $! > $S/pid",
+                    f"S={scratch}/qa; rm -rf $S/m; mkdir -p ${{S}}/m",
+                    f"export S={scratch}/qa\nnode $S/qa.js > $S/out.log",
+                    "cp .handoffs/t/01-pm.md /tmp/review.md"):
+            self.assertAllowed(cmd, agent="qa", cwd=handoffs)
+        self.assertBlocked("rm -rf $UNSET_EVAL_VAR/x")
+        self.assertBlocked("S=/; rm -rf $S")
+        self.assertBlocked("D=.handoffs/t; echo x > $D/state.md", agent="qa")
+        self.assertBlocked("cp report.md .handoffs/t/", agent="qa")
+        self.assertBlocked("cp -t .handoffs/t report.md", agent="qa")
+
     def test_bad_input_is_ignored(self):
         result = subprocess.run([sys.executable, GUARD], input="not json", capture_output=True, text=True)
         self.assertEqual(result.returncode, 0)

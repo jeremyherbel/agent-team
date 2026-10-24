@@ -154,14 +154,21 @@ def score(run_dir, task, use_judge=False):
     meta = json.loads((run_dir / "meta.json").read_text()) if (run_dir / "meta.json").exists() else {}
     turns = [summarize_turn(read_events(f)) for f in turn_files(run_dir)]
     first_texts = "\n".join(turns[0]["texts"] + [turns[0]["final"]]) if turns else ""
-    tier = "fast" if "Fast-Path Plan" in first_texts else "full" if "Execution Plan" in first_texts else "unknown"
+    handoffs = handoff_files(remote)
+    names = [Path(f).name for f in handoffs]
+    # The fast path posts its brief and starts at once, so the saved brief is the reliable signal.
+    if any(n.startswith("00-brief") for n in names) or "Fast-Path Plan" in first_texts:
+        tier = "fast"
+    elif "Execution Plan" in first_texts or any(n.startswith("01-pm") for n in names):
+        tier = "full"
+    else:
+        tier = "unknown"
 
     heads = remote_heads(remote)
     default = next((b for b in heads if b in DEFAULT_BRANCHES), None)
     default_untouched = (heads.get(default) == meta["initial_default_sha"]) if meta.get("initial_default_sha") \
         else sh(["git", "rev-list", "--count", default], cwd=remote).stdout.strip() == "1"
     branch = work_branch(remote)
-    handoffs = handoff_files(remote)
 
     result = {
         "task": task["id"],
