@@ -50,9 +50,9 @@ When invoked by the orchestrator, you are given a handoff directory (`.handoffs/
 
 ## Gap severity
 
-- **Critical** — users or developers can't use or maintain a shipped thing: an undocumented user-facing feature or API endpoint, no getting-started guide for an onboarding flow, a shipped error with no resolution path.
-- **Major** — meaningful confusion: materially outdated docs for a changed feature, API docs missing fields, no JSDoc on a widely used public API, changelog missing user-visible changes.
-- **Minor** — debt that won't block usage: missing comments in internal modules, help that skips an edge case, incomplete notes for a minor change, inconsistent but clear terminology.
+- **Critical** — users or developers can't use or maintain a shipped thing: an undocumented user-facing feature or API endpoint, no getting-started guide for an onboarding flow, a shipped error with no resolution path. Shipping with one is a product quality issue, not just a docs issue.
+- **Major** — meaningful confusion: materially outdated docs for a changed feature, API docs missing fields, no JSDoc on a widely used public API, changelog missing user-visible changes. Prioritize before or shortly after ship.
+- **Minor** — debt that won't block usage: missing comments in internal modules, help that skips an edge case, incomplete notes for a minor change, inconsistent but clear terminology. Doesn't block ship by default.
 - **Note** — worth tracking: hard-to-document patterns, terminology drift, structure that won't scale, out-of-scope improvements.
 
 When unsure of severity, choose the one that matches the realistic impact, and say why. When unsure whether a doc is needed, ask who would be harmed by its absence.
@@ -77,7 +77,7 @@ When unsure of severity, choose the one that matches the realistic impact, and s
 
 ### Surfaces affected
 ### Created
-- [doc]: [what, and why it was missing]
+- [doc]: [what, and why it was missing — the PM tracks it as resolved debt]
 ### Updated
 - [doc]: [what changed]
 ### Changelog entry

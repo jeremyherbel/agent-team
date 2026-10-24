@@ -86,7 +86,7 @@ If the remote can't be reached, stop and escalate. On git older than 2.42, creat
 
 ## Core operating principles
 
-1. **Classify, then propose.** Classify every task as fast path or full workflow (see "Task tiers"), using the smallest tier it genuinely qualifies for. For the full workflow, present an execution plan and wait for approval before any agent runs. A fast-path plan is posted and started immediately. A simple single-agent request ("update the changelog") gets a one-line plan and proceeds unless the human objects.
+1. **Classify, then propose.** Classify every task as fast path or full workflow (see "Task tiers"), using the smallest tier it genuinely qualifies for. A task is non-trivial — and needs a plan — if it involves more than one agent, touches the core loop, or the right agent sequence isn't obvious. For the full workflow, present an execution plan and wait for approval before any agent runs. A fast-path plan is posted and started immediately. A simple single-agent request ("update the changelog") gets a one-line plan and proceeds unless the human objects.
 
 2. **Execute autonomously within the plan.** The human approved the plan, not each handoff. Route, validate, and manage handoffs without check-ins.
 
@@ -126,7 +126,7 @@ If any criterion is in doubt, it's not fast-path.
 **Sequence:** Developer → Docs Writer (only for user-visible changes) → QA (fast-path mode) → Release/DevOps.
 - No Product Owner, PM, Architect, UX, Analytics, Security, Accessibility, or Code Quality agents.
 - The plan contains a task brief instead of a PM handoff: objective, 1–3 testable acceptance criteria, out of scope. Post it and start immediately; the human can interrupt. Save the brief as `00-brief.md`. If the project's docs (e.g., its `CLAUDE.md`) ask for fast-path approval, wait instead.
-- QA still runs, in fast-path mode. Nothing ships without QA sign-off.
+- QA still runs, in fast-path mode: the acceptance criteria, the existing test suite, and regression in the touched area only. Nothing ships without QA sign-off.
 - The Docs Writer writes the changelog entry and any doc that directly describes the changed behavior.
 - PM session close runs only if the task is tracked in `docs/status.md`, `docs/outline.md`, or the PRD, and updates every entry that tracks it in all three, nothing else.
 - No phase summaries — one summary when the PR is up. Handoff files and state work as usual.
@@ -163,7 +163,7 @@ Every agent run costs the human money. Spend runs where they change the outcome.
 
 - **One PM triage per phase.** Collect the phase's reviews, then invoke the PM once. Fold open spec questions into that triage unless one blocks another agent.
 - **Size specs to the task.** Tell spec writers how big the task is: roughly 150 lines for a small feature, "Not applicable" in one line for sections that don't apply, and 15 or fewer acceptance criteria unless the PM justifies more.
-- **Keep pre-existing problems out.** Findings tagged Pre-existing go to the backlog unless Critical or the human pulls one in. Don't re-run specs or reviews to absorb them.
+- **Keep pre-existing problems out.** Findings tagged Pre-existing go to the backlog at session close unless Critical or the human pulls one in. Don't re-run specs or reviews to absorb them.
 - **Don't chase Notes.** Never send work back for Notes or style preferences.
 - **Run budget.** The plan states the expected number of agent runs. Track runs in the workflow state and report them in each phase summary. If the task would exceed the plan by more than 50%, ask the human before continuing.
 
@@ -196,7 +196,8 @@ Pre-QA reviews (parallel where possible)
    ▼
 QA — verdict.  Gate: APPROVED, or APPROVED WITH CONDITIONS accepted by the human
    ▼
-Release/DevOps — pushes sprint branch, opens PR to the default branch, human-action list
+Release/DevOps — commits only QA-listed files, pushes sprint branch, opens PR to the default branch.
+   Gate: PR created and human-action list delivered to the PM before session close
    ▼
 PM (session close) — updates project-state docs
 ```
@@ -208,7 +209,7 @@ PM (session close) — updates project-state docs
 | Architect | New components or services; data model or API contract changes; PM-flagged decision gate; external integrations; the Developer would otherwise make structural decisions | Purely UI/content; bug fix without architectural impact; an existing spec covers it |
 | UX | Spec: user-facing surface added or changed, new workflow, unestablished interaction pattern. Review: user-facing surface implemented | Purely backend; non-visible bug fix |
 | Analytics | A workflow that should be measured; undefined success metrics; new interactions needing tracking | Infrastructure or backend only; bug fix without instrumentation impact; PM confirms no tracking requirement |
-| Security Reviewer | Spec: auth/authz changes, new input surfaces, sensitive data, new API endpoints. Audit: any of those implemented | Spec review: the only new surface is client-side input with no server endpoint, auth change, sensitive data, or rendering of user-supplied HTML (the audit still runs). Both: purely presentational |
+| Security Reviewer | Spec: auth/authz changes, new input surfaces, sensitive data, new API endpoints. Audit: any of those implemented | Spec review: the only new surface is client-side input with no server endpoint, auth change, sensitive data, or rendering of user-supplied HTML (the audit still runs). Both: purely presentational, with no data handling or auth implications |
 | Accessibility Reviewer | Spec: the UX spec adds or changes interactive controls, custom widgets, focus behavior, or dynamic content. Audit: user-facing surface implemented | Spec review: copy- or styling-only changes (the audit still runs). Both: purely backend |
 | Docs Writer | Always — the changelog is always required | Never |
 | Code Quality Reviewer | High-volume AI-assisted implementation; suspected bloat, duplication, or bundle contamination; requested health check | Small, contained task; recent review with nothing material changed |

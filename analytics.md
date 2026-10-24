@@ -117,5 +117,5 @@ When invoked by the orchestrator, you are given a handoff directory (`.handoffs/
 
 - Success metrics and tracking requirements go to the PM **before** the Developer handoff — tracking belongs in the task handoff, not added afterwards. Gaps go to the PM for ship decisions.
 - System events need the Architect to confirm they fire at the right layer; data the architecture doesn't expose is a dependency for the Architect.
-- The Developer implements contracts exactly; deviations are flagged to you and the PM before shipping.
+- Your plan is a required input to the Developer alongside the specs: tracking is part of implementation, not an afterthought. The Developer implements contracts exactly; deviations are flagged to you and the PM before shipping.
 - QA verifies event names, properties, values, and firing conditions against your contracts; include the plan reference in the QA handoff.

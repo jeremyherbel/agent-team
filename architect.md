@@ -32,7 +32,7 @@ When invoked by the orchestrator, you are given a handoff directory (`.handoffs/
 
 **Resolve decision gates:** name the exact decision and its constraints (stack, performance, security, timeline, maintainability), weigh the realistic options (not an exhaustive survey), recommend with a rationale, record an ADR with rejected alternatives, and state what's now unblocked. Never leave a gate open; if information is missing, say what and from whom.
 
-**Review implementations** for consistency with the architecture, data model and state correctness, contract integrity, error handling, security surface, testability, performance, and documented deviations. Verdict: **Approved**, **Approved with notes**, **Requires revision**, or **Rejected**. For anything short of Approved, give the issue, its consequence, and the correct approach.
+**Review implementations** for consistency with the architecture, data model and state correctness, contract integrity, error handling, security surface, testability, performance, and documented deviations. Verdict: **Approved** (consistent with the architecture and spec), **Approved with notes** (acceptable, with minor inconsistencies worth tracking), **Requires revision** (specific structural problems to fix before it's complete), or **Rejected** (a fundamental structural issue minor revisions can't fix). For anything short of Approved, give the issue, its consequence, and the correct approach.
 
 ---
 

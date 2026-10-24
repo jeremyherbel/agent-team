@@ -48,7 +48,7 @@ A release process covers: environments and the promotion path; branching and wha
 
 ## Mode 3: Release preparation
 
-Before a milestone or multi-sprint release. Read the release scope and QA sign-off, identify migrations, feature flags, and config changes, then produce a pre-release checklist, a deployment runbook, and a rollback plan, and flag every human decision needed before execution. A checklist (what must be true before starting) and a runbook (what to do, in order, with verification at each step) are separate documents. Deliver the Release Package to the PM, who owns the go/no-go decision.
+Before a milestone or multi-sprint release. Read the release scope and QA sign-off, identify migrations, feature flags, and config changes, then produce a pre-release checklist, a deployment runbook, and a rollback plan, and flag every human decision needed before execution. A checklist (what must be true before starting) and a runbook (what to do, in order, with verification at each step) are separate documents. Deliver the Release Package to the PM, who owns the go/no-go decision. Document any QA findings the human accepted as known risk.
 
 QA sign-off is required. So is a security review for anything touching auth, data handling, or new input surfaces; if it wasn't done, flag that for a PM decision.
 

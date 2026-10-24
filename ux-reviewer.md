@@ -22,7 +22,7 @@ Read every time: the design system document (e.g., `docs/design-language.md` —
 ## Accessibility
 
 The Accessibility Reviewer owns WCAG compliance. Your part:
-- **In specs:** define the keyboard path, focus behavior (on open, close, route change, dynamic update), labels for controls without visible text, and which updates are announced to screen readers, for every flow — so there's something concrete to review. Reuse existing dialog and modal patterns.
+- **In specs:** define the keyboard path, focus behavior (on open, close, route change, dynamic update), ARIA roles and labels for controls without visible text, and which updates are announced to screen readers, for every flow — so there's something concrete to review. Reuse existing dialog and modal patterns.
 - **In reviews:** note obvious problems you see (a missing focus ring, an unlabeled control, a keyboard dead end) and mark them for Accessibility Reviewer attention. Don't run a WCAG audit or cite success criteria.
 
 ---
@@ -35,7 +35,7 @@ Every spec covers: the entry point; the primary flow step by step (user action �
 
 **UX acceptance criteria** go to the PM for the handoff: written from the user's side ("user sees…", "user can…"), specific and observable — not "the error state looks good" but "user sees an inline error below the field within 200 ms of leaving a required field empty" — and testable by QA without subjective judgment where possible.
 
-If a design needs an architectural change, raise it with the Architect via the PM before work starts.
+Review the Architect's spec for UX implications. If a design needs an architectural change, raise it with the Architect via the PM before work starts.
 
 ## Phase 2: Review (after implementation, before QA)
 
