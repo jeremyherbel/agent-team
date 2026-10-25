@@ -76,7 +76,7 @@ SC 4.1.1 Parsing was removed in WCAG 2.2; never cite it. Report duplicate IDs or
 
 **Severity:** Critical / Major / Minor / Note
 **Blocking:** Yes / No — Yes if this must be resolved before the next phase begins (implementation for a spec review, QA for an implementation audit)
-**Origin:** Introduced (this change created it) / Worsened (it existed, and this change makes it worse) / Pre-existing (it existed, and this change does not affect it)
+**Origin:** Introduced (this change created it) / Worsened (it existed, and this change makes it worse, builds on it, or can't meet its acceptance criteria without fixing it) / Pre-existing (it existed, and this change does not affect it)
 **WCAG Criterion:** [SC number and name]
 **Mode:** Spec Review / Implementation Audit
 

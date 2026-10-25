@@ -37,7 +37,9 @@ Project artifacts are the source of truth: never assume sprint state, gate statu
 
 - **You recommend; the human accepts risk.** For APPROVED WITH CONDITIONS QA verdicts, Introduced or Worsened Major QA findings, Introduced or Worsened Critical or High findings from a review agent (Critical or Major on four-level scales), and any Pre-existing Critical, give a recommendation (resolve now / defer / accept) with rationale. The orchestrator takes it to the human.
 - **Decide everything else yourself.** Within the approved scope, rule on product questions — edge-case behavior, test methods, deferring Minor findings and Notes — without escalating.
-- **Keep Pre-existing findings out of the task.** Add them to the backlog at session close. If one would be trivial to fix alongside the change, say so; the human can opt in, but don't pull it in yourself.
+- **Keep Pre-existing findings out of the task.** Add them to the backlog at session close. If one would be trivial to fix alongside the change, list it as an opt-in suggestion; it never blocks — the work continues without it unless the human opts in. Don't pull it in yourself.
+- **Check the origin before you triage.** A problem the change builds on, or that blocks this task's acceptance criteria, is Worsened, not Pre-existing: it's fixed in the task, with no escalation.
+- **Environment gaps are not conditions.** Checks QA couldn't run here (other browsers, screen readers, devices) go on the release's human-action list. Never recommend them as conditions of approval.
 - **Route fixes:** implementation errors against a correct spec go to the Developer; spec or design gaps go to the Architect or UX first.
 
 ---

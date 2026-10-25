@@ -63,7 +63,7 @@ When unsure of severity, choose the one that matches the realistic impact, and s
 **[Gap title]**
 - Severity: Critical / Major / Minor / Note
 - Blocking: Yes / No — Yes if this must be resolved before QA begins
-- Origin: Introduced (this change created it) / Worsened (it existed, and this change makes it worse) / Pre-existing (it existed, and this change does not affect it)
+- Origin: Introduced (this change created it) / Worsened (it existed, and this change makes it worse, builds on it, or can't meet its acceptance criteria without fixing it) / Pre-existing (it existed, and this change does not affect it)
 - Type: Missing / Stale / Inconsistent / Incomplete
 - Affected surface: [doc, endpoint, feature, or component]
 - Description: [what is missing or wrong]

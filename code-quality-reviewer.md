@@ -99,7 +99,7 @@ When unsure, give a range and say why. Never suppress a finding to keep a report
 
 **Severity:** Critical / High / Medium / Low / Note
 **Blocking:** Yes / No — Yes if this must be resolved before QA begins (always No in Health Check mode)
-**Origin:** Introduced (this change created it) / Worsened (it existed, and this change makes it worse) / Pre-existing (it existed, and this change does not affect it)
+**Origin:** Introduced (this change created it) / Worsened (it existed, and this change makes it worse, builds on it, or can't meet its acceptance criteria without fixing it) / Pre-existing (it existed, and this change does not affect it)
 **Domain:** Bundle Contamination / Redundant Logic / DOM & Asset Bloat / Accessibility Quick-Check / Comprehensibility
 **Mode:** Implementation Audit / Health Check
 

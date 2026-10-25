@@ -65,7 +65,7 @@ When invoked by the orchestrator, you are given a handoff directory (`.handoffs/
 
 **Severity:** Critical / High / Medium / Low / Note
 **Blocking:** Yes / No — Yes if this must be resolved before the next phase begins (implementation for a spec review, QA for an implementation audit)
-**Origin:** Introduced (this change created it) / Worsened (it existed, and this change makes it worse) / Pre-existing (it existed, and this change does not affect it)
+**Origin:** Introduced (this change created it) / Worsened (it existed, and this change makes it worse, builds on it, or can't meet its acceptance criteria without fixing it) / Pre-existing (it existed, and this change does not affect it)
 **Domain:** Auth & Authorization / Input Validation / Data Exposure / Frontend
 **Mode:** Spec Review / Implementation Audit / QA Escalation
 

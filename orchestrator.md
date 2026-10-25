@@ -102,7 +102,7 @@ If the remote can't be reached, stop and escalate. On git older than 2.42, creat
    - a QA verdict of APPROVED WITH CONDITIONS — each condition to be deferred rather than resolved
    - an Introduced or Worsened Major QA finding the PM recommends shipping with
    - an Introduced or Worsened Critical or High finding from any review agent (after severity normalization) that the PM recommends shipping with, deferring, or accepting
-   - a Pre-existing Critical finding, whatever the PM recommends
+   - a Pre-existing Critical finding, whatever the PM recommends. A problem the change builds on, or that blocks this task's acceptance criteria, is Worsened, not Pre-existing — it's fixed in the task without asking.
 
 8. **Escalate only when necessary.** The team exists so work proceeds without the human. After plan approval, interrupt only for principle 7, a scope change beyond the plan, a conflict between agents, a run-budget overrun, or a blocker the workflow can't resolve. The PM rules on product questions within scope (edge-case behavior, test methods, deferring Minor findings and Notes). Pre-existing findings that aren't Critical go to the backlog and appear in summaries for information only.
 
@@ -164,6 +164,7 @@ Every agent run costs the human money. Spend runs where they change the outcome.
 - **One PM triage per phase.** Collect the phase's reviews, then invoke the PM once. Fold open spec questions into that triage unless one blocks another agent.
 - **Size specs to the task.** Tell spec writers how big the task is: roughly 150 lines for a small feature, "Not applicable" in one line for sections that don't apply, and 15 or fewer acceptance criteria unless the PM justifies more.
 - **Keep pre-existing problems out.** Findings tagged Pre-existing go to the backlog at session close unless Critical or the human pulls one in. Don't re-run specs or reviews to absorb them.
+- **Opt-in suggestions never stop the run.** When the PM notes that a pre-existing problem would be cheap to fix alongside the change, list it in the phase summary and the PR description and carry on without it. The human opts in by replying; never wait for that reply.
 - **Don't chase Notes.** Never send work back for Notes or style preferences.
 - **Run budget.** The plan states the expected number of agent runs. Track runs in the workflow state and report them in each phase summary. If the task would exceed the plan by more than 50%, ask the human before continuing.
 
@@ -362,7 +363,7 @@ Normalize to the four-level scale whenever you compare, summarize, or escalate f
 - [ ] Regression results documented
 - [ ] Exploratory testing summary present (full workflow only)
 
-**NOT APPROVED:** route the full report to the PM; no release. **APPROVED WITH CONDITIONS:** PM recommends on each condition, then the human accepts explicitly (principle 7) before release. **APPROVED:** proceed to Release/DevOps.
+**NOT APPROVED:** route the full report to the PM; no release. **APPROVED WITH CONDITIONS:** PM recommends on each condition, then the human accepts explicitly (principle 7) before release. Checks this environment couldn't run (other browsers, screen readers, devices) are never conditions: if they're the only ones, treat the verdict as APPROVED and put them on the release's human-action list, with no stop. **APPROVED:** proceed to Release/DevOps.
 
 ### Release/DevOps output
 - [ ] Sprint branch pushed

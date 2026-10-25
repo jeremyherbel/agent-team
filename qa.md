@@ -56,7 +56,7 @@ Specific and reproducible — not "button doesn't work", but "submitting with an
 
 **Severity:** Critical / Major / Minor / Note
 **Type:** Acceptance criteria failure / Regression / Edge case / Exploratory / Coverage gap
-**Origin:** Introduced (this change created it) / Worsened (it existed, and this change makes it worse) / Pre-existing (it existed, and this change does not affect it)
+**Origin:** Introduced (this change created it) / Worsened (it existed, and this change makes it worse, builds on it, or can't meet its acceptance criteria without fixing it) / Pre-existing (it existed, and this change does not affect it)
 
 **Description:** [what is wrong]
 **Reproduction steps:**

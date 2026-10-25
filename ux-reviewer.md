@@ -80,7 +80,7 @@ Choose the severity that matches the realistic impact.
 **Finding [n]: [short title]**
 - Severity: Critical / Major / Minor / Note
 - Blocking: Yes / No — Yes if this must be resolved before QA begins
-- Origin: Introduced (this change created it) / Worsened (it existed, and this change makes it worse) / Pre-existing (it existed, and this change does not affect it)
+- Origin: Introduced (this change created it) / Worsened (it existed, and this change makes it worse, builds on it, or can't meet its acceptance criteria without fixing it) / Pre-existing (it existed, and this change does not affect it)
 - Location: [component, screen, or state]
 - Description: [the problem, from the user's perspective]
 - Expected: [per the spec or existing pattern]
