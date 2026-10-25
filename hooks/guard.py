@@ -260,7 +260,10 @@ def check_git(args, cwd, agent, project):
             block("Stage files by path. git add -A, -u, and . can pick up work that QA never verified.")
         if sub == "commit" and any(o in ("--all",) or (re.match(r"^-[a-zA-Z]+$", o) and "a" in o) for o in opts):
             block("git commit -a stages everything. Stage files by path, then commit.")
-        if agent != "orchestrator" and in_handoffs(repo, project) and sub not in READ_ONLY_GIT:
+        listing = (sub == "branch" and not positional and all(o in ("--show-current", "--list", "-l", "-a", "-r", "-v", "-vv", "--all", "--remotes") for o in opts)) \
+            or (sub == "worktree" and positional[:1] == ["list"]) or (sub == "remote" and not positional) \
+            or (sub == "config" and any(o in ("--get", "--list", "-l") for o in opts))
+        if agent != "orchestrator" and in_handoffs(repo, project) and sub not in READ_ONLY_GIT and not listing:
             block("Only the orchestrator writes to .handoffs/. Read handoff files; return your output instead.")
 
 
@@ -338,7 +341,11 @@ def check_bash(command, data, agent, project, depth=0):
                 elif paths(args):
                     writes.append(paths(args)[-1])  # only the destination is written
             if cmd == "sed" and any(a.startswith("-i") or a == "--in-place" for a in args):
-                writes += paths(args)
+                # Without -e or -f, the first non-option argument is the sed script, not a file.
+                files = paths(args)
+                if not any(a in ("-e", "-f", "--expression", "--file") or a.startswith(("--expression=", "--file=")) for a in args):
+                    files = files[1:]
+                writes += files
             # A path with an unknown variable can't be placed; the rm rule above covers the dangerous case.
             if any(known and in_handoffs(resolve(w, cwd), project) for w, known in writes):
                 block("Only the orchestrator writes to .handoffs/. Read handoff files; return your output instead.")

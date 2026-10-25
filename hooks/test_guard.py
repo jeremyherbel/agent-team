@@ -170,6 +170,18 @@ class GuardTest(unittest.TestCase):
         self.assertBlocked("git add .", agent="orchestrator")  # the code checkout is still staged by path
         self.assertBlocked("git add .", agent="developer", cwd=handoffs)
 
+    def test_read_only_commands_in_handoffs(self):
+        # Seen in eval runs: agents inspecting the handoffs worktree, or editing scratch files from inside it.
+        handoffs = os.path.join(self.project, ".handoffs")
+        scratch = tempfile.gettempdir()
+        for cmd in ("ls .handoffs .handoffs/t 2>&1; git -C .handoffs branch --show-current",
+                    "cd .handoffs && git branch --show-current && git worktree list",
+                    f"S={scratch}/qa\nsed -i \"s#^const log=#const S='$S';\\nconst log=#\" $S/audit.mjs"):
+            self.assertAllowed(cmd, agent="qa", cwd=handoffs)
+        self.assertBlocked("git -C .handoffs branch -D old", agent="qa")
+        self.assertBlocked("sed -i s/a/b/ .handoffs/t/state.md", agent="qa")
+        self.assertBlocked("sed -i -e s/a/b/ .handoffs/t/state.md", agent="qa")
+
     def test_bad_input_is_ignored(self):
         result = subprocess.run([sys.executable, GUARD], input="not json", capture_output=True, text=True)
         self.assertEqual(result.returncode, 0)
