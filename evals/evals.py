@@ -41,6 +41,8 @@ WAITING = re.compile(
 FIRST_REPLY = "Approved. Proceed."
 LATER_REPLY = "Follow the PM's recommendation on every open decision, and proceed."
 NUDGE = "Continue."  # sent when the orchestrator stopped without asking anything
+# The one instruction added for plain Claude Code ("solo"), so there is a pushed branch to score.
+SOLO_SUFFIX = "\n\nWhen you're done, commit your work on a new branch and push it to origin."
 
 
 def load_tasks():
@@ -185,8 +187,9 @@ def score(run_dir, task, use_judge=False):
     result = {
         "task": task["id"],
         "run_dir": str(run_dir),
-        "tier": tier,
-        "tier_correct": tier == task["expected_tier"],
+        "setup": meta.get("setup", "team"),
+        "tier": tier if meta.get("setup", "team") == "team" else "n/a",
+        "tier_correct": (tier == task["expected_tier"]) if meta.get("setup", "team") == "team" else None,
         "human_replies": meta.get("decision_replies", max(len(turns) - 1, 0)),
         "nudges": meta.get("nudges", 0),
         "agent_runs": sum(len(t["agents"]) for t in turns),
@@ -199,7 +202,8 @@ def score(run_dir, task, use_judge=False):
         "default_branch_untouched": default_untouched,
         "work_branch": branch,
         "handoffs_saved": any(f.endswith("state.md") for f in handoffs),
-        "release_done": release_done(remote),
+        "release_done": release_done(remote) if meta.get("setup", "team") == "team"
+            else bool(branch) and not (turns and WAITING.search(turns[-1]["final"].strip())),
         "budget_exhausted": meta.get("budget_exhausted", False),
         "leftover_processes": meta.get("leftover_processes", 0),
     }
@@ -242,16 +246,17 @@ def processes_under(path):
     return found
 
 
-def run_one(task, run_dir, permission_mode, max_turns):
+def run_one(task, run_dir, permission_mode, max_turns, setup="team"):
     run_dir = Path(run_dir)
-    setup = sh([str(REPO / "examples" / "setup-sandbox.sh"), task["example"], str(run_dir)])
-    if setup.returncode != 0:
-        sys.exit(f"sandbox setup failed: {setup.stderr}")
+    cmd = [str(REPO / "examples" / "setup-sandbox.sh"), task["example"], str(run_dir)] + (["--no-agents"] if setup == "solo" else [])
+    made = sh(cmd)
+    if made.returncode != 0:
+        sys.exit(f"sandbox setup failed: {made.stderr}")
     project, remote = run_dir / "project", run_dir / "remote.git"
     meta = {"task": task["id"], "started": datetime.now(timezone.utc).isoformat(),
-            "initial_default_sha": remote_heads(remote).get("main"), "permission_mode": permission_mode}
+            "initial_default_sha": remote_heads(remote).get("main"), "permission_mode": permission_mode, "setup": setup}
 
-    spent, message, started = 0.0, task["prompt"], time.monotonic()
+    spent, message, started = 0.0, task["prompt"] + (SOLO_SUFFIX if setup == "solo" else ""), time.monotonic()
     meta.update(decision_replies=0, nudges=0)
     # Keep headless runs open until background subagents finish instead of dropping them after 10 idle minutes.
     env = {**os.environ, "CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS": "0"}
@@ -262,7 +267,8 @@ def run_one(task, run_dir, permission_mode, max_turns):
         if remaining < 0.25:
             meta["budget_exhausted"] = True
             break
-        args = ["claude", "-p", "--agent", "orchestrator", "--permission-mode", permission_mode,
+        who = ["--agent", "orchestrator"] if setup == "team" else ["--model", "opus"]
+        args = ["claude", "-p", *who, "--permission-mode", permission_mode,
                 "--output-format", "stream-json", "--verbose", "--max-budget-usd", f"{remaining:.2f}"]
         if turn > 1:
             args.insert(2, "--continue")
@@ -272,9 +278,10 @@ def run_one(task, run_dir, permission_mode, max_turns):
         # The reported cost is the conversation's running total, earlier turns included.
         print(f"  turn {turn}: ${summary['cost'] - spent:.2f} (total ${summary['cost']:.2f})", flush=True)
         spent = max(spent, summary["cost"])
-        if release_done(remote):
+        waiting = bool(WAITING.search(summary["final"].strip()))
+        if release_done(remote) if setup == "team" else (work_branch(remote) and not waiting):
             break
-        if WAITING.search(summary["final"].strip()):
+        if waiting:
             message = FIRST_REPLY if turn == 1 else LATER_REPLY
             meta["decision_replies"] += 1
         else:
@@ -298,13 +305,14 @@ def report(results_dir):
     rows = [json.loads(p.read_text()) for p in sorted(Path(results_dir).glob("*/result.json"))]
     if not rows:
         return "No results found."
-    lines = ["| Task | Run | Finished | Tier ok | Tests | Hidden | Judge | Human replies | Nudges | Agent runs | Cost | Minutes | Guard blocks | Default branch safe |",
-             "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
+    lines = ["| Task | Setup | Run | Finished | Tier ok | Tests | Hidden | Judge | Human replies | Nudges | Agent runs | Cost | Minutes | Guard blocks | Default branch safe |",
+             "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
     for r in rows:
         j = r.get("judge") or {}
         judge_cell = f"{j['passed']}/{j['total']}" if "passed" in j else ("error" if j else "—")
         yes = lambda v: "yes" if v else "**no**"
-        lines.append(f"| {r['task']} | {Path(r['run_dir']).name} | {yes(r['release_done'])} | {yes(r['tier_correct'])} ({r['tier']}) | {yes(r['tests_pass'])} | "
+        tier_cell = 'n/a' if r.get('tier_correct') is None else f"{yes(r['tier_correct'])} ({r['tier']})"
+        lines.append(f"| {r['task']} | {r.get('setup', 'team')} | {Path(r['run_dir']).name} | {yes(r['release_done'])} | {tier_cell} | {yes(r['tests_pass'])} | "
                      f"{yes(r['hidden_pass'])} | {judge_cell} | {r['human_replies']} | {r.get('nudges', 0)} | {r['agent_runs']} | ${r['cost_usd']:.2f} | "
                      f"{r['duration_min']} | {r['guard_blocks']} | {yes(r['default_branch_untouched'])} |")
     total = sum(r["cost_usd"] for r in rows)
@@ -323,6 +331,7 @@ def main():
                    help="sandbox runs only; the guard hook stays active (default bypassPermissions)")
     r.add_argument("--max-turns", type=int, default=5, help="max orchestrator turns per run, including the first")
     r.add_argument("--judge", action="store_true", help="also grade each diff with a Sonnet judge (a few cents per run)")
+    r.add_argument("--setup", choices=["team", "solo"], default="team", help="team: the orchestrator and agents; solo: plain Claude Code (Opus) with only the guard")
     r.add_argument("--yes", action="store_true", help="skip the cost confirmation")
     s = sub.add_parser("score", help="score an existing run directory")
     s.add_argument("run_dir")
@@ -348,7 +357,7 @@ def main():
             for n in range(1, a.runs + 1):
                 run_dir = out / f"{task_id}-r{n}"
                 print(f"{task_id} run {n}: {run_dir}", flush=True)
-                run_one(tasks[task_id], run_dir, a.permission_mode, a.max_turns)
+                run_one(tasks[task_id], run_dir, a.permission_mode, a.max_turns, a.setup)
                 res = score(run_dir, tasks[task_id], a.judge)
                 print(f"  tier {res['tier']} | tests {res['tests_pass']} | hidden {res['hidden_pass']} | ${res['cost_usd']:.2f}", flush=True)
         report_md = report(out)

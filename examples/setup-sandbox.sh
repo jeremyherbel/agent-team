@@ -2,7 +2,8 @@
 # Copy an example project into a throwaway git repo with the agents installed,
 # so a test run can create branches, handoffs, and PRs without touching this repo.
 #
-# Usage: examples/setup-sandbox.sh <example> <target-dir>
+# Usage: examples/setup-sandbox.sh <example> <target-dir> [--no-agents]
+#   --no-agents  install only the guard hook and settings, for comparing plain Claude Code
 #   e.g. examples/setup-sandbox.sh tasklist /tmp/tasklist-run
 #
 # Creates:
@@ -14,6 +15,8 @@ examples="$(cd "$(dirname "$0")" && pwd)"
 repo="$(cd "$examples/.." && pwd)"
 name="${1:?usage: setup-sandbox.sh <example> <target-dir>}"
 target="${2:?usage: setup-sandbox.sh <example> <target-dir>}"
+agents=yes
+[ "${3:-}" = "--no-agents" ] && agents=no
 
 [ -d "$examples/$name" ] || { echo "No example named '$name' in $examples" >&2; exit 1; }
 [ -e "$target" ] && { echo "$target already exists; choose a new directory" >&2; exit 1; }
@@ -24,6 +27,7 @@ target="$(cd "$target" && pwd)"
 git init -q --bare -b main "$target/remote.git"
 cp -R "$examples/$name" "$target/project"
 
+if [ "$agents" = yes ]; then
 mkdir -p "$target/project/.claude/agents"
 for f in "$repo"/*.md; do
   case "$(basename "$f")" in
@@ -34,6 +38,7 @@ done
 
 mkdir -p "$target/project/.claude/agent-reference"
 cp "$repo"/reference/*.md "$target/project/.claude/agent-reference/"
+fi
 
 mkdir -p "$target/project/.claude/hooks"
 cp "$repo/hooks/guard.py" "$target/project/.claude/hooks/"
