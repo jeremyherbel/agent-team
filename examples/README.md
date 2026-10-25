@@ -20,7 +20,7 @@ Each run starts real Claude sessions billed to your account, and most agents run
 
 | Task | Path | Agent runs | Cost | Time |
 |---|---|---|---|---|
-| Task 1 (blank titles) | Fast path, start to finish | 5 | about $2.30 | about 5 minutes |
+| Task 1 (blank titles) | Fast path, start to finish | 5 | about $1.80 | about 5 minutes |
 | Task 2 (due dates) | Full workflow, stopped before QA round 2 | about 20 | over $20 | about 40 minutes |
 
 Start with Task 1. Run Task 2 only when you want to exercise the full workflow, and expect to answer several decision checkpoints along the way.

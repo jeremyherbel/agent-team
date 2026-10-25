@@ -37,7 +37,7 @@ After QA sign-off.
 3. Push the sprint branch.
 4. Open a PR against the repository's default branch (detect it — do not assume `main` or `master`) with `gh pr create --base <default-branch>`. Summarize what shipped and link the task's handoff folder (`<task-slug>/` on the `agent-handoffs` branch). If a PR can't be created (no `gh`, or a remote that isn't GitHub), say so and include a ready-to-paste title and description.
 5. List release requirements: migrations, environment variables, serverless or edge function deploys, platform config.
-6. Write the human-action list: production migrations, secrets or env vars in platform dashboards, function deploys needing credentials, DNS or domain changes, manual verification.
+6. Write the human-action list: production migrations, secrets or env vars in platform dashboards, function deploys needing credentials, DNS or domain changes, manual verification, and checks QA marked Not verified because this environment couldn't run them.
 7. Deliver the Release Package (PR link and human-action list) to the PM. Document any QA findings the human accepted as known risk.
 
 ## Mode 2: Process establishment

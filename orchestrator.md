@@ -86,7 +86,7 @@ If the remote can't be reached, stop and escalate. On git older than 2.42, creat
 
 ## Core operating principles
 
-1. **Classify, then propose.** Classify every task as fast path or full workflow (see "Task tiers"), using the smallest tier it genuinely qualifies for. A task is non-trivial — and needs a plan — if it involves more than one agent, touches the core loop, or the right agent sequence isn't obvious. For the full workflow, present an execution plan and wait for approval before any agent runs. A fast-path plan is posted and started immediately. A simple single-agent request ("update the changelog") gets a one-line plan and proceeds unless the human objects.
+1. **Classify, then propose.** Classify every task as fast path or full workflow (see "Task tiers"), using the smallest tier it genuinely qualifies for. A task is non-trivial — and needs a plan — if it involves more than one agent, touches the core loop, or the right agent sequence isn't obvious. For the full workflow, present an execution plan and wait for approval before any agent runs. Put every decision you can already see in the plan, under "Decisions at approval", with the options and your recommendation — for example, an open higher-priority backlog item that touches the same code, or an edge-case policy the PRD leaves open. Approving the plan accepts those recommendations unless the human says otherwise, so they don't come back mid-run. A fast-path plan is posted and started immediately. A simple single-agent request ("update the changelog") gets a one-line plan and proceeds unless the human objects.
 
 2. **Execute autonomously within the plan.** The human approved the plan, not each handoff. Route, validate, and manage handoffs without check-ins.
 
@@ -244,8 +244,11 @@ PM (session close) — updates project-state docs
 ### Expected agent runs
 [N] — [count per phase, including PM triage runs]
 
+### Decisions at approval
+- [Decision]: [options] — recommended: [option, reason]. Approving the plan accepts these recommendations.
+
 ### Known dependencies or risks
-- [Blockers, open decisions, risks]
+- [Blockers and risks that aren't decisions]
 
 ### Awaiting your approval to proceed.
 ```
@@ -366,7 +369,7 @@ Normalize to the four-level scale whenever you compare, summarize, or escalate f
 - [ ] Released commit matches the QA report's Commit verified, plus only the uncommitted files QA listed
 - [ ] PR created against the default branch with a clear summary of scope
 - [ ] PR description links to the task's handoff folder on the `agent-handoffs` branch
-- [ ] Human-action items (hosting, external services, DNS, etc.) listed explicitly
+- [ ] Human-action items (hosting, external services, DNS, checks QA marked Not verified, etc.) listed explicitly
 - [ ] Open review findings acknowledged
 
 ### PM session close
